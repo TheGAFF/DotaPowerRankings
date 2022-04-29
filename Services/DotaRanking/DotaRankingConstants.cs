@@ -20,8 +20,9 @@ public static class DotaRankingConstants
     public const decimal ToxicityPingAbandonFactor = 1500M;
     public const decimal ToxicityWordFactor = 7M;
 
-    public const int PowerRankGamesPlayedThreshold = 5;
-    public const decimal PowerRankWinRateThreshold = 0.4M;
+    public const int PowerRankRespectBansThreshold = 5;
+    public const int PowerRankGamesPlayedThreshold = 1;
+    public const decimal PowerRankWinRateThreshold = 0.35M;
     public const decimal WholesomeToxicityScoreThreshold = 125;
     public const int ExcessivePingThreshold = 50;
 

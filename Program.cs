@@ -28,6 +28,7 @@ builder.Services.AddTransient<IGoogleSheetsService, GoogleSheetsService>();
 builder.Services.AddTransient<IDotaDataSource, OpenDotaDotaDataSource>();
 builder.Services.AddTransient<IPlayerDataSource, RD2LPlayerDataSource>();
 builder.Services.AddTransient<IDotaRankingService, DotaRankingService>();
+builder.Services.AddTransient<IPostSeasonAwardService, PostSeasonAwardService>();
 builder.Services
     .AddHttpClient<OpenDotaDotaDataSource>()
     .SetHandlerLifetime(TimeSpan.FromMinutes(60))

@@ -125,6 +125,7 @@ public partial class DotaEnums
         Snapfire = 128,
         Mars = 129,
         Dawnbreaker = 135,
-        Marci = 136
+        Marci = 136,
+        Primal_Beast = 137
     }
 }

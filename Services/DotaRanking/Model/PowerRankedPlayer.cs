@@ -142,5 +142,10 @@ public class PowerRankedPlayer
     [JsonIgnore] public decimal AverageTeamFightParticipation { get; set; }
     
     [JsonIgnore] public decimal AverageDisconnects { get; set; }
+    
+    
+    [JsonIgnore] public PostSeasonPlayerScore PostSeasonPlayerScore { get; set; } = new();
+    
+    
 
 }

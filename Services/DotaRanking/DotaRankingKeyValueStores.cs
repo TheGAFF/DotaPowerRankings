@@ -27,11 +27,14 @@ public static class DotaRankingKeyValueStores
         new KeyValuePair<int, string>(12593, "RD2L Masters Season 1"),
         new KeyValuePair<int, string>(12950, "RD2L Masters Season 2"),
         new KeyValuePair<int, string>(13361, "RD2L Masters Season 3"),
-        new KeyValuePair<int, string>(12939, "Fluffy Hat Dota League"),
-        new KeyValuePair<int, string>(11560, "CDL Season 4"),
-        new KeyValuePair<int, string>(11336, "CDL Season 3"),
-        new KeyValuePair<int, string>(11086, "CDL Season 2"),
-        new KeyValuePair<int, string>(10824, "CDL Season 1")
+        new KeyValuePair<int, string>(12939, "FHDL Season 1"),
+        new KeyValuePair<int, string>(13679, "FHDL Season 3"),
+        new KeyValuePair<int, string>(14078, "FHDL Season 4"),
+        new KeyValuePair<int, string>(13941, "Phase Dota Circuit Season 1"),
+        new KeyValuePair<int, string>(14107, "Phase Dota Circuit Season 2"),
+        new KeyValuePair<int, string>(13807, "League of Lads Season 9"),
+        new KeyValuePair<int, string>(13450, "League of Lads Season 8"),
+        new KeyValuePair<int, string>(13177, "League of Lads Season 7"),
     };
 
     public static readonly List<KeyValuePair<DotaEnums.Badge, decimal>> BadgeWeights =
