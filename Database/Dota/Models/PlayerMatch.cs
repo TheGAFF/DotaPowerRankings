@@ -1,25 +1,19 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Collections.Generic;
+using RD2LPowerRankings.Database.Dota.Models;
 using RD2LPowerRankings.Services.DotaRanking.Enums;
 
-namespace RD2LPowerRankings.Database.Dota.Models;
+namespace RD2LPowerRankings;
 
-[Index(nameof(MatchId))]
-[Index(nameof(PlayerId))]
-[Index(nameof(HeroId))]
-[Index(nameof(StartTime))]
-[Index(nameof(PlayerSlot))]
 public class PlayerMatch
 {
-    public int PlayerSlot { get; set; }
-
     public long MatchId { get; set; }
-    [ForeignKey(nameof(MatchId))] public virtual Match Match { get; set; } = default!;
     public long PlayerId { get; set; }
+    public int PlayerSlot { get; set; }
     public DateTime? CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public int Abandons { get; set; }
-    public int[] AbilityUpgradesArr { get; set; } = default!;
+    public int[] AbilityUpgradesArr { get; set; } = null!;
     public long ActionsPerMinute { get; set; }
     public int AncientKills { get; set; }
     public int Assists { get; set; }
@@ -36,13 +30,13 @@ public class PlayerMatch
     public int CreepsStacked { get; set; }
     public int Deaths { get; set; }
     public int Denies { get; set; }
-    public int[] DnT { get; set; } = default!;
+    public int[] DnT { get; set; } = null!;
     public long Duration { get; set; }
     public bool FirstbloodClaimed { get; set; }
     public int Gold { get; set; }
     public int GoldPerMin { get; set; }
     public int GoldSpent { get; set; }
-    public int[] GoldT { get; set; } = default!;
+    public int[] GoldT { get; set; } = null!;
     public long HeroDamage { get; set; }
     public long HeroHealing { get; set; }
     public DotaEnums.Hero HeroId { get; set; }
@@ -63,10 +57,9 @@ public class PlayerMatch
     public int? LaneRole { get; set; }
     public int LastHits { get; set; }
     public int LeaverStatus { get; set; }
-
     public int LeagueId { get; set; }
     public int Level { get; set; }
-    public int[] LhT { get; set; } = default!;
+    public int[] LhT { get; set; } = null!;
     public int LifeStateDead { get; set; }
     public DotaEnums.LobbyType? LobbyType { get; set; }
     public bool Lose { get; set; }
@@ -74,7 +67,6 @@ public class PlayerMatch
     public int MultiKills3 { get; set; }
     public int MultiKills4 { get; set; }
     public int MultiKills5 { get; set; }
-
     public long NetWorth { get; set; }
     public int NeutralKills { get; set; }
     public int ObsPlaced { get; set; }
@@ -83,7 +75,6 @@ public class PlayerMatch
     public int Pings { get; set; }
     public int? PartyId { get; set; }
     public int? PartySize { get; set; }
-
     public bool PredVict { get; set; }
     public bool Randomed { get; set; }
     public int? RankTier { get; set; }
@@ -93,15 +84,13 @@ public class PlayerMatch
     public int RoshansKilled { get; set; }
     public int RunePickups { get; set; }
     public int SenPlaced { get; set; }
-
     public int SentryKills { get; set; }
     public int SentryUses { get; set; }
-
     public int? Skill { get; set; }
     public long StartTime { get; set; }
     public decimal Stuns { get; set; }
     public decimal TeamfightParticipation { get; set; }
-    public int[] Times { get; set; } = default!;
+    public int[] Times { get; set; } = null!;
     public long TotalGold { get; set; }
     public long TotalXp { get; set; }
     public long TowerDamage { get; set; }
@@ -109,9 +98,7 @@ public class PlayerMatch
     public int TowersKilled { get; set; }
     public bool Win { get; set; }
     public int XpPerMin { get; set; }
-    public int[] XpT { get; set; } = default!;
-    public virtual IList<PlayerMatchAbility>? AbilityUses { get; set; }
-    public virtual IList<PlayerMatchAction>? Actions { get; set; }
-    public virtual IList<PlayerMatchItemFirstPurchase>? FirstPurchases { get; set; }
-    public virtual IList<PlayerMatchItemUse>? ItemUses { get; set; }
+    public int[] XpT { get; set; } = null!;
+
+    public virtual Match Match { get; set; } = new();
 }

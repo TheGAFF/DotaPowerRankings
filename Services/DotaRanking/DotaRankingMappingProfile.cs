@@ -8,6 +8,6 @@ public class DotaMappingProfile : Profile
 {
     public DotaMappingProfile()
     {
-        CreateMap<Player, PowerRankedPlayer>();
+        CreateMap<Database.Dota.Models.Player, PowerRankedPlayer>();
     }
 }

@@ -67,8 +67,7 @@ public class DotaAwardsService : IDotaAwardsService
         foreach (var player in players.Where(x => x.Heroes.Any(y => y.Score > 0))
                      .OrderBy(y => y.Heroes.Where(z => z.Score > 0).Average(z => z.WinRate)).Take(5))
         {
-            player.Awards.Add(new PowerRankedAward($"#{index + 1} Lowest win rate",
-                (DotaEnums.AwardColor)(index < 3 ? index : 3)));
+            player.Awards.Add(new PowerRankedAward($"#{index + 1} Lowest win rate", DotaEnums.AwardColor.Red));
             index++;
         }
 
@@ -146,12 +145,80 @@ public class DotaAwardsService : IDotaAwardsService
 
         index = 0;
         foreach (var player in players
-                     .OrderBy(y => y.CreatedAt).Take(1))
+                     .OrderByDescending(y => y.MatchPeruPercent).Take(3))
         {
-            player.Awards.Add(new PowerRankedAward("1st to Sign-up",
-                DotaEnums.AwardColor.Gold));
+            player.Awards.Add(new PowerRankedAward($"#{index + 1} Peru Match %",
+                DotaEnums.AwardColor.Blue));
             index++;
         }
+
+        index = 0;
+        foreach (var player in players
+                     .OrderByDescending(y => y.MatchRussiaPercent).Take(3))
+        {
+            player.Awards.Add(new PowerRankedAward($"#{index + 1} Russia Match %",
+                DotaEnums.AwardColor.Blue));
+            index++;
+        }
+
+        index = 0;
+        foreach (var player in players
+                     .OrderByDescending(y => y.MatchEUEastPercent).Take(3))
+        {
+            player.Awards.Add(new PowerRankedAward($"#{index + 1} EU East Match %",
+                DotaEnums.AwardColor.Blue));
+            index++;
+        }
+
+        index = 0;
+        foreach (var player in players
+                     .OrderByDescending(y => y.MatchEUWestPercent).Take(3))
+        {
+            player.Awards.Add(new PowerRankedAward($"#{index + 1} EU West Match %",
+                DotaEnums.AwardColor.Blue));
+            index++;
+        }
+
+        index = 0;
+        foreach (var player in players
+                     .OrderByDescending(y => y.MatchUSEastPercent).Take(3))
+        {
+            player.Awards.Add(new PowerRankedAward($"#{index + 1} US East Match %",
+                DotaEnums.AwardColor.Blue));
+            index++;
+        }
+
+        index = 0;
+        foreach (var player in players
+                     .OrderByDescending(y => y.MatchUSWestPercent).Take(3))
+        {
+            player.Awards.Add(new PowerRankedAward($"#{index + 1} US West Match %",
+                DotaEnums.AwardColor.Blue));
+            index++;
+        }
+
+        index = 0;
+        foreach (var player in players
+                     .OrderByDescending(y => y.AverageLaneEfficiency).Take(5))
+        {
+            player.Awards.Add(new PowerRankedAward($"#{index + 1} Best Laner",
+                DotaEnums.AwardColor.Green));
+            index++;
+        }
+
+        index = 0;
+        foreach (var player in players
+                     .OrderByDescending(y => y.AverageSentriesPlaced).Take(5))
+        {
+            player.Awards.Add(new PowerRankedAward($"#{index + 1} Avg Sentries Placed",
+                DotaEnums.AwardColor.Green));
+            index++;
+        }
+        
+        
+
+        players[0].Awards.Add(new PowerRankedAward("1st to Sign-up", DotaEnums.AwardColor.Gold));
+
 
         foreach (var player in players)
         {

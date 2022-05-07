@@ -120,7 +120,9 @@ public class DotaRankingService : IDotaRankingService
                         (x.LobbyType != DotaEnums.LobbyType.Practice ||
                          validLeagueIds.Contains(x.LeagueId)))
             .ToList();
-        var playerWords = _context.PlayerWords.AsNoTracking().ToList();
+        var playerWords = _context.PlayerWords.AsNoTracking().Where(x => playerIds.Any(y => y == x.PlayerId)).ToList();
+        var playerItemUses = _context.PlayerMatchItemUses.AsNoTracking()
+            .Where(x => playerIds.Any(y => y == x.PlayerId)).ToList();
 
         Parallel.ForEach(playerIds, new ParallelOptions { MaxDegreeOfParallelism = 6 },
             playerId =>
@@ -136,6 +138,7 @@ public class DotaRankingService : IDotaRankingService
                         player,
                         playerMatches.Where(x => x.PlayerId == playerId).ToList(),
                         playerWords.Where(x => x.PlayerId == playerId).ToList(),
+                        playerItemUses.Where(x => x.PlayerId == playerId).ToList(),
                         league,
                         division
                     ));
@@ -144,14 +147,24 @@ public class DotaRankingService : IDotaRankingService
         return powerRankedPlayers.ToList();
     }
 
-    private PowerRankedPlayer GeneratePowerRankedPlayer(Player player, List<PlayerMatch> playerMatches,
-        List<PlayerWord> playerWords, PowerRankedLeague league, PowerRankedDivision division)
+    private PowerRankedPlayer GeneratePowerRankedPlayer(Player player,
+        List<PlayerMatch> playerMatches,
+        List<PlayerWord> playerWords,
+        List<PlayerMatchItemUse> playerItemUses,
+        PowerRankedLeague league,
+        PowerRankedDivision division)
     {
+        foreach (var playerMatch in playerMatches)
+        {
+            playerMatch.Match.PlayerMatchItemUses =
+                playerItemUses.Where(x => x.MatchId == playerMatch.MatchId).ToList();
+        }
+
+
         var powerRankedPlayer = _mapper.Map<PowerRankedPlayer>(player);
         powerRankedPlayer.DivisionName = division.Name;
 
         powerRankedPlayer.AverageWordToxicity = GetPlayerAverageWordToxicity(playerWords, playerMatches.Count);
-
 
         powerRankedPlayer.FirstBloodAverage =
             (decimal)playerMatches.Count(x => x.FirstbloodClaimed) / playerMatches.Count * 1M;
@@ -194,6 +207,13 @@ public class DotaRankingService : IDotaRankingService
         powerRankedPlayer.AverageAPM = (decimal)playerMatches.Average(x => x.ActionsPerMinute);
         powerRankedPlayer.AverageTowerDamage = (decimal)playerMatches.Average(x => x.TowerDamage);
         powerRankedPlayer.AverageDisconnects = (decimal)playerMatches.Average(x => x.DisconnectCount);
+
+        powerRankedPlayer.AverageLaneEfficiency =
+            (decimal)playerMatches.Where(x => x.LaneEfficiencyPct > 40).Average(x => x.LaneEfficiencyPct);
+
+        powerRankedPlayer.AverageSentriesPlaced =
+            (decimal)playerMatches.Where(x => x.LaneEfficiencyPct < 40).Average(x => x.SenPlaced);
+
 
         if (league.LeagueId.HasValue && playerMatches.Count(x => x.LeagueId == league.LeagueId.Value) > 0)
         {

@@ -386,7 +386,7 @@ public class OpenDotaDotaDataSource : IDotaDataSource
 
                 await _context.PlayerMatches.Upsert(playerMatch).On(x => new { x.PlayerId, x.MatchId }).RunAsync();
 
-                playerMatch.AbilityUses = new List<PlayerMatchAbility>();
+                var abilities = new List<PlayerMatchAbility>();
                 if (player["ability_uses"] != null)
                 {
                     foreach (dynamic itemRaw in player["ability_uses"])
@@ -396,14 +396,14 @@ public class OpenDotaDotaDataSource : IDotaDataSource
                         item.Count = itemRaw.Value;
                         item.MatchId = match.MatchId;
                         item.PlayerId = playerMatch.PlayerId;
-                        playerMatch.AbilityUses.Add(item);
+                        abilities.Add(item);
                     }
 
-                    await _context.PlayerMatchAbilities.UpsertRange(playerMatch.AbilityUses)
+                    await _context.PlayerMatchAbilities.UpsertRange(abilities)
                         .On(x => new { x.PlayerId, x.MatchId, x.Ability }).RunAsync();
                 }
 
-                playerMatch.Actions = new List<PlayerMatchAction>();
+                var actions = new List<PlayerMatchAction>();
                 if (player["ability_uses"] != null)
                 {
                     foreach (dynamic itemRaw in player["actions"])
@@ -413,14 +413,14 @@ public class OpenDotaDotaDataSource : IDotaDataSource
                         item.Count = itemRaw.Value;
                         item.MatchId = match.MatchId;
                         item.PlayerId = playerMatch.PlayerId;
-                        playerMatch.Actions.Add(item);
+                        actions.Add(item);
                     }
                 }
 
-                await _context.PlayerMatchActions.UpsertRange(playerMatch.Actions)
+                await _context.PlayerMatchActions.UpsertRange(actions)
                     .On(x => new { x.PlayerId, x.MatchId, x.Action }).RunAsync();
 
-                playerMatch.ItemUses = new List<PlayerMatchItemUse>();
+                var itemUses = new List<PlayerMatchItemUse>();
                 foreach (dynamic itemRaw in player["item_uses"])
                 {
                     var item = new PlayerMatchItemUse();
@@ -428,13 +428,13 @@ public class OpenDotaDotaDataSource : IDotaDataSource
                     item.Uses = itemRaw.Value;
                     item.MatchId = match.MatchId;
                     item.PlayerId = playerMatch.PlayerId;
-                    playerMatch.ItemUses.Add(item);
+                    itemUses.Add(item);
                 }
 
-                await _context.PlayerMatchItemUses.UpsertRange(playerMatch.ItemUses)
+                await _context.PlayerMatchItemUses.UpsertRange(itemUses)
                     .On(x => new { x.PlayerId, x.MatchId, x.Item }).RunAsync();
 
-                playerMatch.FirstPurchases = new List<PlayerMatchItemFirstPurchase>();
+                var firstPurchases = new List<PlayerMatchItemFirstPurchase>();
                 foreach (dynamic itemRaw in player["first_purchase_time"])
                 {
                     var item = new PlayerMatchItemFirstPurchase();
@@ -442,10 +442,10 @@ public class OpenDotaDotaDataSource : IDotaDataSource
                     item.Time = itemRaw.Value as long? ?? 0;
                     item.MatchId = match.MatchId;
                     item.PlayerId = playerMatch.PlayerId;
-                    playerMatch.FirstPurchases.Add(item);
+                    firstPurchases.Add(item);
                 }
 
-                await _context.PlayerMatchItemFirstPurchases.UpsertRange(playerMatch.FirstPurchases)
+                await _context.PlayerMatchItemFirstPurchases.UpsertRange(firstPurchases)
                     .On(x => new { x.PlayerId, x.MatchId, x.Item }).RunAsync();
             }
 

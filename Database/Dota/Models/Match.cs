@@ -1,26 +1,22 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
-using RD2LPowerRankings.Services.DotaRanking.Enums;
+﻿using RD2LPowerRankings.Services.DotaRanking.Enums;
 
 namespace RD2LPowerRankings.Database.Dota.Models;
 
-[Index(nameof(GameMode))]
-[Index(nameof(Leagueid))]
-[Index(nameof(LobbyType))]
-[Index(nameof(Skill))]
 public class Match
-
 {
-    [DatabaseGenerated(DatabaseGeneratedOption.None)]
-    [Key]
-    public long MatchId { get; set; }
+    public Match()
+    {
+        PlayerMatchAbilities = new HashSet<PlayerMatchAbility>();
+        PlayerMatchActions = new HashSet<PlayerMatchAction>();
+        PlayerMatchItemFirstPurchases = new HashSet<PlayerMatchItemFirstPurchase>();
+        PlayerMatchItemUses = new HashSet<PlayerMatchItemUse>();
+        PlayerMatches = new HashSet<PlayerMatch>();
+    }
 
+    public long MatchId { get; set; }
     public DateTime? CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
-
     public bool Loaded { get; set; }
-
     public int? BarracksStatusDire { get; set; }
     public int? BarracksStatusRadiant { get; set; }
     public int? Cluster { get; set; }
@@ -38,11 +34,11 @@ public class Match
     public int? NegativeVotes { get; set; }
     public int? Patch { get; set; }
     public int? PositiveVotes { get; set; }
-    public long[] RadiantGoldAdv { get; set; } = default!;
+    public long[] RadiantGoldAdv { get; set; } = null!;
     public int? RadiantScore { get; set; }
     public int? RadiantTeamId { get; set; }
     public bool? RadiantWin { get; set; }
-    public long[] RadiantXpAdv { get; set; } = default!;
+    public long[] RadiantXpAdv { get; set; } = null!;
     public DotaEnums.Region? Region { get; set; }
     public long? ReplaySalt { get; set; }
     public string? ReplayUrl { get; set; }
@@ -55,5 +51,11 @@ public class Match
     public int? TowerStatusDire { get; set; }
     public int? Version { get; set; }
 
-    public virtual IList<PlayerMatch>? Players { get; set; }
+    public virtual ICollection<PlayerMatchAbility> PlayerMatchAbilities { get; set; }
+    public virtual ICollection<PlayerMatchAction> PlayerMatchActions { get; set; }
+
+    public virtual ICollection<PlayerMatchItemFirstPurchase> PlayerMatchItemFirstPurchases { get; set; }
+
+    public virtual ICollection<PlayerMatchItemUse> PlayerMatchItemUses { get; set; }
+    public virtual ICollection<PlayerMatch> PlayerMatches { get; set; }
 }

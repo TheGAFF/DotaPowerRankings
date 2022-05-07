@@ -1,17 +1,15 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Collections.Generic;
+using RD2LPowerRankings.Database.Dota.Models;
 
-namespace RD2LPowerRankings.Database.Dota.Models;
+namespace RD2LPowerRankings;
 
-[Index(nameof(MatchId))]
-[Index(nameof(PlayerId))]
-public class PlayerMatchAbility
+public partial class PlayerMatchAbility
 {
-    public string Ability { get; set; } = default!;
+    public string Ability { get; set; } = null!;
+    public long MatchId { get; set; }
+    public long PlayerId { get; set; }
     public long Count { get; set; }
 
-    public long MatchId { get; set; }
-
-    [ForeignKey(nameof(MatchId))] public virtual Match? Match { get; set; }
-    public long PlayerId { get; set; }
+    public virtual Match Match { get; set; } = null!;
 }
