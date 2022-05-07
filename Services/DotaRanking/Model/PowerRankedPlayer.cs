@@ -7,8 +7,8 @@ namespace RD2LPowerRankings.Modules.Dota.Model;
 public class PowerRankedPlayer
 {
     public long PlayerId { get; set; }
-    
-    [JsonIgnore]  public DateTime? CreatedAt { get; set; }
+
+    [JsonIgnore] public DateTime? CreatedAt { get; set; }
 
     public string? DraftName { get; set; }
 
@@ -132,20 +132,18 @@ public class PowerRankedPlayer
     [JsonIgnore] public decimal AverageExcessPings { get; set; }
 
     [JsonIgnore] public decimal AverageExcessPingAbandons { get; set; }
-    
+
     [JsonIgnore] public decimal AverageAPM { get; set; }
-    
+
     [JsonIgnore] public decimal AverageTowerDamage { get; set; }
 
     [JsonIgnore] public decimal AverageStuns { get; set; }
-    
-    [JsonIgnore] public decimal AverageTeamFightParticipation { get; set; }
-    
-    [JsonIgnore] public decimal AverageDisconnects { get; set; }
-    
-    
-    [JsonIgnore] public PostSeasonPlayerScore PostSeasonPlayerScore { get; set; } = new();
-    
-    
 
+    [JsonIgnore] public decimal AverageTeamFightParticipation { get; set; }
+
+    [JsonIgnore] public decimal AverageDisconnects { get; set; }
+    [JsonIgnore] public PostSeasonPlayerScore PostSeasonPlayerScore { get; set; } = new();
+
+    [JsonIgnore] public PlayerReviewScore PlayerReviewScore { get; set; } = new();
+    public PlayerReview PlayerReview { get; set; } = new();
 }

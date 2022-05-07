@@ -1,9 +1,6 @@
-﻿
-using RD2LPowerRankings.Database.Dota;
-using RD2LPowerRankings.Database.Dota.Models;
+﻿using RD2LPowerRankings.Database.Dota;
 using RD2LPowerRankings.Modules.Dota.Model;
 using RD2LPowerRankings.Services.DotaRanking.Enums;
-
 
 namespace RD2LPowerRankings.Services.DotaRanking;
 
@@ -17,31 +14,29 @@ public class PostSeasonAwardService : IPostSeasonAwardService
         _logger = logger;
         _context = context;
     }
-    
+
     public PowerRankedLeague GeneratePostSeasonAwards(PowerRankedLeague league)
     {
         if (!league.LeagueId.HasValue)
         {
             return league;
         }
-        
+
         foreach (var division in league.Divisions)
         {
             division.PostSeasonAwards = GivePostSeasonAwards(division);
         }
-        
-        
+
+
         return league;
     }
 
     private List<PostSeasonAward> GivePostSeasonAwards(PowerRankedDivision division)
     {
-
         var awards = new List<PostSeasonAward>();
 
-
-
-        var players = division.Teams.SelectMany(x => x.Players).OrderByDescending(x => x.PostSeasonPlayerScore.TotalAssists).Take(2).ToArray();
+        var players = division.Teams.SelectMany(x => x.Players)
+            .OrderByDescending(x => x.PostSeasonPlayerScore.TotalAssists).Take(2).ToArray();
         var award = new PostSeasonAward
         {
             Category = DotaEnums.PostSeasonAwardCategory.Support,
@@ -52,8 +47,9 @@ public class PostSeasonAwardService : IPostSeasonAwardService
             RunnerUpValue = $"{players[1].PostSeasonPlayerScore.TotalAssists:N0}"
         };
         awards.Add(award);
-        
-        players = division.Teams.SelectMany(x => x.Players).OrderByDescending(x => x.PostSeasonPlayerScore.TotalDenies).Take(2).ToArray();
+
+        players = division.Teams.SelectMany(x => x.Players).OrderByDescending(x => x.PostSeasonPlayerScore.TotalDenies)
+            .Take(2).ToArray();
         award = new PostSeasonAward
         {
             Category = DotaEnums.PostSeasonAwardCategory.Misc,
@@ -64,8 +60,9 @@ public class PostSeasonAwardService : IPostSeasonAwardService
             RunnerUpValue = $"{players[1].PostSeasonPlayerScore.TotalDenies:N0}"
         };
         awards.Add(award);
-        
-        players = division.Teams.SelectMany(x => x.Players).OrderByDescending(x => x.PostSeasonPlayerScore.TotalGold).Take(2).ToArray();
+
+        players = division.Teams.SelectMany(x => x.Players).OrderByDescending(x => x.PostSeasonPlayerScore.TotalGold)
+            .Take(2).ToArray();
         award = new PostSeasonAward
         {
             Category = DotaEnums.PostSeasonAwardCategory.Core,
@@ -77,7 +74,8 @@ public class PostSeasonAwardService : IPostSeasonAwardService
         };
         awards.Add(award);
 
-        players = division.Teams.SelectMany(x => x.Players).OrderByDescending(x => x.PostSeasonPlayerScore.TotalHealing).Take(2).ToArray();
+        players = division.Teams.SelectMany(x => x.Players).OrderByDescending(x => x.PostSeasonPlayerScore.TotalHealing)
+            .Take(2).ToArray();
         award = new PostSeasonAward
         {
             Category = DotaEnums.PostSeasonAwardCategory.Support,
@@ -88,8 +86,9 @@ public class PostSeasonAwardService : IPostSeasonAwardService
             RunnerUpValue = $"{players[1].PostSeasonPlayerScore.TotalHealing:N0}"
         };
         awards.Add(award);
-        
-        players = division.Teams.SelectMany(x => x.Players).OrderByDescending(x => x.PostSeasonPlayerScore.TotalPings).Take(2).ToArray();
+
+        players = division.Teams.SelectMany(x => x.Players).OrderByDescending(x => x.PostSeasonPlayerScore.TotalPings)
+            .Take(2).ToArray();
         award = new PostSeasonAward
         {
             Category = DotaEnums.PostSeasonAwardCategory.Misc,
@@ -100,8 +99,9 @@ public class PostSeasonAwardService : IPostSeasonAwardService
             RunnerUpValue = $"{players[1].PostSeasonPlayerScore.TotalPings:N0}"
         };
         awards.Add(award);
-        
-        players = division.Teams.SelectMany(x => x.Players).OrderByDescending(x => x.PostSeasonPlayerScore.TotalAncientsKilled).Take(2).ToArray();
+
+        players = division.Teams.SelectMany(x => x.Players)
+            .OrderByDescending(x => x.PostSeasonPlayerScore.TotalAncientsKilled).Take(2).ToArray();
         award = new PostSeasonAward
         {
             Category = DotaEnums.PostSeasonAwardCategory.Core,
@@ -112,8 +112,9 @@ public class PostSeasonAwardService : IPostSeasonAwardService
             RunnerUpValue = $"{players[1].PostSeasonPlayerScore.TotalAncientsKilled:N0}"
         };
         awards.Add(award);
-        
-        players = division.Teams.SelectMany(x => x.Players).OrderByDescending(x => x.PostSeasonPlayerScore.TotalBuyBacks).Take(2).ToArray();
+
+        players = division.Teams.SelectMany(x => x.Players)
+            .OrderByDescending(x => x.PostSeasonPlayerScore.TotalBuyBacks).Take(2).ToArray();
         award = new PostSeasonAward
         {
             Category = DotaEnums.PostSeasonAwardCategory.Misc,
@@ -124,8 +125,9 @@ public class PostSeasonAwardService : IPostSeasonAwardService
             RunnerUpValue = $"{players[1].PostSeasonPlayerScore.TotalBuyBacks:N0}"
         };
         awards.Add(award);
-        
-        players = division.Teams.SelectMany(x => x.Players).OrderByDescending(x => x.PostSeasonPlayerScore.TotalCampsStacked).Take(2).ToArray();
+
+        players = division.Teams.SelectMany(x => x.Players)
+            .OrderByDescending(x => x.PostSeasonPlayerScore.TotalCampsStacked).Take(2).ToArray();
         award = new PostSeasonAward
         {
             Category = DotaEnums.PostSeasonAwardCategory.Support,
@@ -136,8 +138,9 @@ public class PostSeasonAwardService : IPostSeasonAwardService
             RunnerUpValue = $"{players[1].PostSeasonPlayerScore.TotalCampsStacked:N0}"
         };
         awards.Add(award);
-        
-        players = division.Teams.SelectMany(x => x.Players).OrderByDescending(x => x.PostSeasonPlayerScore.TotalCourierKills).Take(2).ToArray();
+
+        players = division.Teams.SelectMany(x => x.Players)
+            .OrderByDescending(x => x.PostSeasonPlayerScore.TotalCourierKills).Take(2).ToArray();
         award = new PostSeasonAward
         {
             Category = DotaEnums.PostSeasonAwardCategory.Support,
@@ -149,7 +152,8 @@ public class PostSeasonAwardService : IPostSeasonAwardService
         };
         awards.Add(award);
 
-        players = division.Teams.SelectMany(x => x.Players).OrderByDescending(x => x.PostSeasonPlayerScore.TotalFirstBloods).Take(2).ToArray();
+        players = division.Teams.SelectMany(x => x.Players)
+            .OrderByDescending(x => x.PostSeasonPlayerScore.TotalFirstBloods).Take(2).ToArray();
         award = new PostSeasonAward
         {
             Category = DotaEnums.PostSeasonAwardCategory.Misc,
@@ -160,8 +164,9 @@ public class PostSeasonAwardService : IPostSeasonAwardService
             RunnerUpValue = $"{players[1].PostSeasonPlayerScore.TotalFirstBloods:N0}"
         };
         awards.Add(award);
-        
-        players = division.Teams.SelectMany(x => x.Players).OrderByDescending(x => x.PostSeasonPlayerScore.TotalLastHits).Take(2).ToArray();
+
+        players = division.Teams.SelectMany(x => x.Players)
+            .OrderByDescending(x => x.PostSeasonPlayerScore.TotalLastHits).Take(2).ToArray();
         award = new PostSeasonAward
         {
             Category = DotaEnums.PostSeasonAwardCategory.Core,
@@ -172,8 +177,9 @@ public class PostSeasonAwardService : IPostSeasonAwardService
             RunnerUpValue = $"{players[1].PostSeasonPlayerScore.TotalLastHits:N0}"
         };
         awards.Add(award);
-        
-        players = division.Teams.SelectMany(x => x.Players).OrderByDescending(x => x.PostSeasonPlayerScore.TotalNeutralKills).Take(2).ToArray();
+
+        players = division.Teams.SelectMany(x => x.Players)
+            .OrderByDescending(x => x.PostSeasonPlayerScore.TotalNeutralKills).Take(2).ToArray();
         award = new PostSeasonAward
         {
             Category = DotaEnums.PostSeasonAwardCategory.Core,
@@ -184,8 +190,9 @@ public class PostSeasonAwardService : IPostSeasonAwardService
             RunnerUpValue = $"{players[1].PostSeasonPlayerScore.TotalNeutralKills:N0}"
         };
         awards.Add(award);
-        
-        players = division.Teams.SelectMany(x => x.Players).OrderByDescending(x => x.PostSeasonPlayerScore.TotalObsPlaced).Take(2).ToArray();
+
+        players = division.Teams.SelectMany(x => x.Players)
+            .OrderByDescending(x => x.PostSeasonPlayerScore.TotalObsPlaced).Take(2).ToArray();
         award = new PostSeasonAward
         {
             Category = DotaEnums.PostSeasonAwardCategory.Support,
@@ -196,8 +203,9 @@ public class PostSeasonAwardService : IPostSeasonAwardService
             RunnerUpValue = $"{players[1].PostSeasonPlayerScore.TotalObsPlaced}"
         };
         awards.Add(award);
-        
-        players = division.Teams.SelectMany(x => x.Players).OrderByDescending(x => x.PostSeasonPlayerScore.TotalRoshansKilled).Take(2).ToArray();
+
+        players = division.Teams.SelectMany(x => x.Players)
+            .OrderByDescending(x => x.PostSeasonPlayerScore.TotalRoshansKilled).Take(2).ToArray();
         award = new PostSeasonAward
         {
             Category = DotaEnums.PostSeasonAwardCategory.Misc,
@@ -208,8 +216,9 @@ public class PostSeasonAwardService : IPostSeasonAwardService
             RunnerUpValue = $"{players[1].PostSeasonPlayerScore.TotalRoshansKilled}"
         };
         awards.Add(award);
-        
-        players = division.Teams.SelectMany(x => x.Players).OrderByDescending(x => x.PostSeasonPlayerScore.TotalSentriesPlaced).Take(2).ToArray();
+
+        players = division.Teams.SelectMany(x => x.Players)
+            .OrderByDescending(x => x.PostSeasonPlayerScore.TotalSentriesPlaced).Take(2).ToArray();
         award = new PostSeasonAward
         {
             Category = DotaEnums.PostSeasonAwardCategory.Support,
@@ -220,8 +229,9 @@ public class PostSeasonAwardService : IPostSeasonAwardService
             RunnerUpValue = $"{players[1].PostSeasonPlayerScore.TotalSentriesPlaced:N0}"
         };
         awards.Add(award);
-        
-        players = division.Teams.SelectMany(x => x.Players).OrderByDescending(x => x.PostSeasonPlayerScore.TotalStunSeconds).Take(2).ToArray();
+
+        players = division.Teams.SelectMany(x => x.Players)
+            .OrderByDescending(x => x.PostSeasonPlayerScore.TotalStunSeconds).Take(2).ToArray();
         award = new PostSeasonAward
         {
             Category = DotaEnums.PostSeasonAwardCategory.Misc,
@@ -232,20 +242,22 @@ public class PostSeasonAwardService : IPostSeasonAwardService
             RunnerUpValue = $"{players[1].PostSeasonPlayerScore.TotalStunSeconds:F2}"
         };
         awards.Add(award);
-        
-        players = division.Teams.SelectMany(x => x.Players).OrderByDescending(x => x.PostSeasonPlayerScore.TotalTimeDead).Take(2).ToArray();
+
+        players = division.Teams.SelectMany(x => x.Players)
+            .OrderByDescending(x => x.PostSeasonPlayerScore.TotalTimeDead).Take(2).ToArray();
         award = new PostSeasonAward
         {
             Category = DotaEnums.PostSeasonAwardCategory.Misc,
             Name = "Total Time Dead (minutes)",
             Awardee = players[0].PersonaName!,
-            Value = $"{TimeSpan.FromSeconds( players[0].PostSeasonPlayerScore.TotalTimeDead).TotalMinutes:N0}",
+            Value = $"{TimeSpan.FromSeconds(players[0].PostSeasonPlayerScore.TotalTimeDead).TotalMinutes:N0}",
             RunnerUp = players[1].PersonaName!,
-            RunnerUpValue = $"{TimeSpan.FromSeconds( players[1].PostSeasonPlayerScore.TotalTimeDead).TotalMinutes:N0}"
+            RunnerUpValue = $"{TimeSpan.FromSeconds(players[1].PostSeasonPlayerScore.TotalTimeDead).TotalMinutes:N0}"
         };
         awards.Add(award);
-        
-        players = division.Teams.SelectMany(x => x.Players).OrderByDescending(x => x.PostSeasonPlayerScore.TotalTowerDamage).Take(2).ToArray();
+
+        players = division.Teams.SelectMany(x => x.Players)
+            .OrderByDescending(x => x.PostSeasonPlayerScore.TotalTowerDamage).Take(2).ToArray();
         award = new PostSeasonAward
         {
             Category = DotaEnums.PostSeasonAwardCategory.Misc,
@@ -256,8 +268,9 @@ public class PostSeasonAwardService : IPostSeasonAwardService
             RunnerUpValue = $"{players[1].PostSeasonPlayerScore.TotalTowerDamage:N0}"
         };
         awards.Add(award);
-        
-        players = division.Teams.SelectMany(x => x.Players).OrderByDescending(x => x.PostSeasonPlayerScore.AverageActionsPerMin).Take(2).ToArray();
+
+        players = division.Teams.SelectMany(x => x.Players)
+            .OrderByDescending(x => x.PostSeasonPlayerScore.AverageActionsPerMin).Take(2).ToArray();
         award = new PostSeasonAward
         {
             Category = DotaEnums.PostSeasonAwardCategory.Misc,
@@ -268,20 +281,22 @@ public class PostSeasonAwardService : IPostSeasonAwardService
             RunnerUpValue = $"{players[1].PostSeasonPlayerScore.AverageActionsPerMin:F2}"
         };
         awards.Add(award);
-        
-        players = division.Teams.SelectMany(x => x.Players).OrderByDescending(x => x.PostSeasonPlayerScore.AverageTeamFightParticipation).Take(2).ToArray();
+
+        players = division.Teams.SelectMany(x => x.Players)
+            .OrderByDescending(x => x.PostSeasonPlayerScore.AverageTeamFightParticipation).Take(2).ToArray();
         award = new PostSeasonAward
         {
             Category = DotaEnums.PostSeasonAwardCategory.Misc,
             Name = "Highest Average Team Fight Participation %",
             Awardee = players[0].PersonaName!,
-            Value = $"{(players[0].PostSeasonPlayerScore.AverageTeamFightParticipation * 100):F2}",
+            Value = $"{players[0].PostSeasonPlayerScore.AverageTeamFightParticipation * 100:F2}",
             RunnerUp = players[1].PersonaName!,
-            RunnerUpValue = $"{(players[1].PostSeasonPlayerScore.AverageTeamFightParticipation * 100):F2}"
+            RunnerUpValue = $"{players[1].PostSeasonPlayerScore.AverageTeamFightParticipation * 100:F2}"
         };
         awards.Add(award);
-        
-        players = division.Teams.SelectMany(x => x.Players).OrderByDescending(x => x.PostSeasonPlayerScore.AverageLaneEffiencyPct).Take(2).ToArray();
+
+        players = division.Teams.SelectMany(x => x.Players)
+            .OrderByDescending(x => x.PostSeasonPlayerScore.AverageLaneEffiencyPct).Take(2).ToArray();
         award = new PostSeasonAward
         {
             Category = DotaEnums.PostSeasonAwardCategory.Core,
@@ -292,8 +307,9 @@ public class PostSeasonAwardService : IPostSeasonAwardService
             RunnerUpValue = $"{players[1].PostSeasonPlayerScore.AverageLaneEffiencyPct:F2}"
         };
         awards.Add(award);
-        
-        players = division.Teams.SelectMany(x => x.Players).OrderByDescending(x => x.PostSeasonPlayerScore.TotalRunesPickedUp).Take(2).ToArray();
+
+        players = division.Teams.SelectMany(x => x.Players)
+            .OrderByDescending(x => x.PostSeasonPlayerScore.TotalRunesPickedUp).Take(2).ToArray();
         award = new PostSeasonAward
         {
             Category = DotaEnums.PostSeasonAwardCategory.Misc,
@@ -304,20 +320,24 @@ public class PostSeasonAwardService : IPostSeasonAwardService
             RunnerUpValue = $"{players[1].PostSeasonPlayerScore.TotalRunesPickedUp}"
         };
         awards.Add(award);
-        
-        players = division.Teams.SelectMany(x => x.Players).OrderByDescending(x => x.PostSeasonPlayerScore.MostGamesOnSingleHero).Take(2).ToArray();
+
+        players = division.Teams.SelectMany(x => x.Players)
+            .OrderByDescending(x => x.PostSeasonPlayerScore.MostGamesOnSingleHero).Take(2).ToArray();
         award = new PostSeasonAward
         {
             Category = DotaEnums.PostSeasonAwardCategory.Misc,
             Name = "Most Games on a Single Hero",
             Awardee = players[0].PersonaName!,
-            Value = $"{players[0].PostSeasonPlayerScore.MostGamesOnSingleHeroId} | {players[0].PostSeasonPlayerScore.MostGamesOnSingleHero}",
+            Value =
+                $"{players[0].PostSeasonPlayerScore.MostGamesOnSingleHeroId} | {players[0].PostSeasonPlayerScore.MostGamesOnSingleHero}",
             RunnerUp = players[1].PersonaName!,
-            RunnerUpValue = $"{players[1].PostSeasonPlayerScore.MostGamesOnSingleHeroId} | {players[0].PostSeasonPlayerScore.MostGamesOnSingleHero}"
+            RunnerUpValue =
+                $"{players[1].PostSeasonPlayerScore.MostGamesOnSingleHeroId} | {players[0].PostSeasonPlayerScore.MostGamesOnSingleHero}"
         };
         awards.Add(award);
-        
-        players = division.Teams.SelectMany(x => x.Players).OrderByDescending(x => x.PostSeasonPlayerScore.ItemTotalBrownBoots).Take(2).ToArray();
+
+        players = division.Teams.SelectMany(x => x.Players)
+            .OrderByDescending(x => x.PostSeasonPlayerScore.ItemTotalBrownBoots).Take(2).ToArray();
         award = new PostSeasonAward
         {
             Category = DotaEnums.PostSeasonAwardCategory.Misc,
@@ -328,8 +348,9 @@ public class PostSeasonAwardService : IPostSeasonAwardService
             RunnerUpValue = $"{players[1].PostSeasonPlayerScore.ItemTotalBrownBoots}"
         };
         awards.Add(award);
-        
-        players = division.Teams.SelectMany(x => x.Players).OrderByDescending(x => x.PostSeasonPlayerScore.ItemTotalDivineRapiers).Take(2).ToArray();
+
+        players = division.Teams.SelectMany(x => x.Players)
+            .OrderByDescending(x => x.PostSeasonPlayerScore.ItemTotalDivineRapiers).Take(2).ToArray();
         award = new PostSeasonAward
         {
             Category = DotaEnums.PostSeasonAwardCategory.Misc,
@@ -340,8 +361,9 @@ public class PostSeasonAwardService : IPostSeasonAwardService
             RunnerUpValue = $"{players[1].PostSeasonPlayerScore.ItemTotalDivineRapiers}"
         };
         awards.Add(award);
-        
-        players = division.Teams.SelectMany(x => x.Players).OrderByDescending(x => x.PostSeasonPlayerScore.ItemTotalGemOfTrueSight).Take(2).ToArray();
+
+        players = division.Teams.SelectMany(x => x.Players)
+            .OrderByDescending(x => x.PostSeasonPlayerScore.ItemTotalGemOfTrueSight).Take(2).ToArray();
         award = new PostSeasonAward
         {
             Category = DotaEnums.PostSeasonAwardCategory.Misc,
@@ -352,7 +374,7 @@ public class PostSeasonAwardService : IPostSeasonAwardService
             RunnerUpValue = $"{players[1].PostSeasonPlayerScore.ItemTotalGemOfTrueSight}"
         };
         awards.Add(award);
-        
+
         var teams = division.Teams.OrderBy(x =>
             x.Players.Max(y => y.PostSeasonPlayerScore.TotalGames) -
             x.Players.Min(y => y.PostSeasonPlayerScore.TotalGames)).Take(2).ToArray();
@@ -361,13 +383,15 @@ public class PostSeasonAwardService : IPostSeasonAwardService
             Category = DotaEnums.PostSeasonAwardCategory.Team,
             Name = "Fewest Stand-in games",
             Awardee = $"Team {teams[0].Name}",
-            Value = $"{teams[0].Players.Max(x => x.PostSeasonPlayerScore.TotalGames) - teams[0].Players.Min(x => x.PostSeasonPlayerScore.TotalGames)}",
+            Value =
+                $"{teams[0].Players.Max(x => x.PostSeasonPlayerScore.TotalGames) - teams[0].Players.Min(x => x.PostSeasonPlayerScore.TotalGames)}",
             RunnerUp = $"Team {teams[1].Name}",
-            RunnerUpValue = $"{teams[1].Players.Max(x => x.PostSeasonPlayerScore.TotalGames) - teams[1].Players.Min(x => x.PostSeasonPlayerScore.TotalGames)}"
+            RunnerUpValue =
+                $"{teams[1].Players.Max(x => x.PostSeasonPlayerScore.TotalGames) - teams[1].Players.Min(x => x.PostSeasonPlayerScore.TotalGames)}"
         };
         awards.Add(award);
-        
-         teams = division.Teams.OrderByDescending(x =>
+
+        teams = division.Teams.OrderByDescending(x =>
             x.Players.Max(y => y.PostSeasonPlayerScore.TotalGames) -
             x.Players.Min(y => y.PostSeasonPlayerScore.TotalGames)).Take(2).ToArray();
         award = new PostSeasonAward
@@ -375,12 +399,14 @@ public class PostSeasonAwardService : IPostSeasonAwardService
             Category = DotaEnums.PostSeasonAwardCategory.Team,
             Name = "Most Stand-in games",
             Awardee = $"Team {teams[0].Name}",
-            Value = $"{teams[0].Players.Max(x => x.PostSeasonPlayerScore.TotalGames) - teams[0].Players.Min(x => x.PostSeasonPlayerScore.TotalGames)}",
+            Value =
+                $"{teams[0].Players.Max(x => x.PostSeasonPlayerScore.TotalGames) - teams[0].Players.Min(x => x.PostSeasonPlayerScore.TotalGames)}",
             RunnerUp = $"Team {teams[1].Name}",
-            RunnerUpValue = $"{teams[1].Players.Max(x => x.PostSeasonPlayerScore.TotalGames) - teams[1].Players.Min(x => x.PostSeasonPlayerScore.TotalGames)}"
+            RunnerUpValue =
+                $"{teams[1].Players.Max(x => x.PostSeasonPlayerScore.TotalGames) - teams[1].Players.Min(x => x.PostSeasonPlayerScore.TotalGames)}"
         };
         awards.Add(award);
-        
+
         teams = division.Teams.OrderByDescending(x =>
             x.Players.Sum(y => y.PostSeasonPlayerScore.TotalHeroesPlayed)).Take(2).ToArray();
         award = new PostSeasonAward
@@ -390,10 +416,10 @@ public class PostSeasonAwardService : IPostSeasonAwardService
             Awardee = $"Team {teams[0].Name}",
             Value = $"{teams[0].Players.Sum(x => x.PostSeasonPlayerScore.TotalHeroesPlayed)}",
             RunnerUp = $"Team {teams[1].Name}",
-            RunnerUpValue = $"{teams[1].Players.Sum(x => x.PostSeasonPlayerScore.TotalHeroesPlayed)}",
+            RunnerUpValue = $"{teams[1].Players.Sum(x => x.PostSeasonPlayerScore.TotalHeroesPlayed)}"
         };
         awards.Add(award);
-        
+
         teams = division.Teams.OrderBy(x =>
             x.Players.Sum(y => y.PostSeasonPlayerScore.TotalHeroesPlayed)).Take(2).ToArray();
         award = new PostSeasonAward
@@ -403,7 +429,7 @@ public class PostSeasonAwardService : IPostSeasonAwardService
             Awardee = $"Team {teams[0].Name}",
             Value = $"{teams[0].Players.Sum(x => x.PostSeasonPlayerScore.TotalHeroesPlayed)}",
             RunnerUp = $"Team {teams[1].Name}",
-            RunnerUpValue = $"{teams[1].Players.Sum(x => x.PostSeasonPlayerScore.TotalHeroesPlayed)}",
+            RunnerUpValue = $"{teams[1].Players.Sum(x => x.PostSeasonPlayerScore.TotalHeroesPlayed)}"
         };
         awards.Add(award);
 
@@ -414,12 +440,14 @@ public class PostSeasonAwardService : IPostSeasonAwardService
             Category = DotaEnums.PostSeasonAwardCategory.Team,
             Name = "Longest Game Won (Minutes)",
             Awardee = $"Team {teams[0].Name}",
-            Value = $"{TimeSpan.FromSeconds(teams[0].Players.Max(x => x.PostSeasonPlayerScore.LongestWonGameLength)).TotalMinutes:N0}",
+            Value =
+                $"{TimeSpan.FromSeconds(teams[0].Players.Max(x => x.PostSeasonPlayerScore.LongestWonGameLength)).TotalMinutes:N0}",
             RunnerUp = $"Team {teams[1].Name}",
-            RunnerUpValue = $"{TimeSpan.FromSeconds(teams[1].Players.Max(x => x.PostSeasonPlayerScore.LongestWonGameLength)).TotalMinutes:N0}",
+            RunnerUpValue =
+                $"{TimeSpan.FromSeconds(teams[1].Players.Max(x => x.PostSeasonPlayerScore.LongestWonGameLength)).TotalMinutes:N0}"
         };
         awards.Add(award);
-        
+
         teams = division.Teams.OrderBy(x =>
             x.Players.Max(y => y.PostSeasonPlayerScore.ShortestWonGameLength)).Take(2).ToArray();
         award = new PostSeasonAward
@@ -427,22 +455,14 @@ public class PostSeasonAwardService : IPostSeasonAwardService
             Category = DotaEnums.PostSeasonAwardCategory.Team,
             Name = "Shortest Game Won (Minutes)",
             Awardee = $"Team {teams[0].Name}",
-            Value = $"{TimeSpan.FromSeconds(teams[0].Players.Max(x => x.PostSeasonPlayerScore.ShortestWonGameLength)).TotalMinutes:N0}",
+            Value =
+                $"{TimeSpan.FromSeconds(teams[0].Players.Max(x => x.PostSeasonPlayerScore.ShortestWonGameLength)).TotalMinutes:N0}",
             RunnerUp = $"Team {teams[1].Name}",
-            RunnerUpValue = $"{TimeSpan.FromSeconds(teams[1].Players.Max(x => x.PostSeasonPlayerScore.ShortestWonGameLength)).TotalMinutes:N0}",
+            RunnerUpValue =
+                $"{TimeSpan.FromSeconds(teams[1].Players.Max(x => x.PostSeasonPlayerScore.ShortestWonGameLength)).TotalMinutes:N0}"
         };
         awards.Add(award);
 
-        
-        
-        
-        
-        
-        
         return awards;
     }
-    
-    
-    
-    
 }

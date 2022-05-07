@@ -33,7 +33,7 @@ public class DotaController : ControllerBase
     /// <returns></returns>
     [HttpGet(Name = "LoadPlayerData")]
     public async Task<bool> LoadPlayerData(
-        [DefaultValue("1jf72KRLmKw93VfGoKBy0FdBIwCgiMY4DmqpynrP-mb8")]
+        [DefaultValue("1Ag8ykOJwXRSh7Eq5k3MrMkgg7UGxaBSpYrydk1DjCxo")]
         string sheetId)
     {
         _logger.LogInformation($"{nameof(LoadPlayerData)} Started");
@@ -49,16 +49,40 @@ public class DotaController : ControllerBase
     /// </summary>
     /// <param name="league"></param>
     /// <returns></returns>
-    [HttpPost(Name = "GetPowerRankings")]
+    [HttpPost("[action]")]
+    [ActionName("Post-Season-Rankings")]
     public bool GetPowerRankings(PlayerDataSourceLeague league)
     {
         _logger.LogInformation($"{nameof(GetPowerRankings)} Started");
 
-        using (var file = System.IO.File.CreateText($"{_webHostEnvironment.ContentRootPath}/season-25.json"))
+        using (var file = System.IO.File.CreateText($"{_webHostEnvironment.ContentRootPath}/{league.FileName}.json"))
         {
             var serializer = JsonSerializer.Create(new JsonSerializerSettings
                 { ContractResolver = new CamelCasePropertyNamesContractResolver() });
-            serializer.Serialize(file, _dotaRankingService.GenerateLeaguePowerRankings(league));
+            serializer.Serialize(file, _dotaRankingService.GeneratePostSeasonLeaguePowerRankings(league));
+        }
+
+        _logger.LogInformation($"{nameof(GetPowerRankings)} Finished");
+
+        return true;
+    }
+
+    /// <summary>
+    ///     Pulls players from the database and generates a json file with pre-season power rankings.
+    /// </summary>
+    /// <param name="league"></param>
+    /// <returns></returns>
+    [HttpPost("[action]")]
+    [ActionName("Pre-Season-Rankings")]
+    public bool GetStartingPowerRankings(PlayerDataSourceLeague league)
+    {
+        _logger.LogInformation($"{nameof(GetPowerRankings)} Started");
+
+        using (var file = System.IO.File.CreateText($"{_webHostEnvironment.ContentRootPath}/{league.FileName}.json"))
+        {
+            var serializer = JsonSerializer.Create(new JsonSerializerSettings
+                { ContractResolver = new CamelCasePropertyNamesContractResolver() });
+            serializer.Serialize(file, _dotaRankingService.GeneratePreSeasonLeaguePowerRankings(league));
         }
 
         _logger.LogInformation($"{nameof(GetPowerRankings)} Finished");

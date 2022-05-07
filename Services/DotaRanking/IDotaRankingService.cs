@@ -5,5 +5,7 @@ namespace RD2LPowerRankings.Modules.Dota;
 
 public interface IDotaRankingService
 {
-    public PowerRankedLeague GenerateLeaguePowerRankings(PlayerDataSourceLeague league);
+    public PowerRankedLeague GeneratePostSeasonLeaguePowerRankings(PlayerDataSourceLeague league);
+
+    public PowerRankedLeague GeneratePreSeasonLeaguePowerRankings(PlayerDataSourceLeague league);
 }

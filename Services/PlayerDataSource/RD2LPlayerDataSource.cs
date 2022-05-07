@@ -83,6 +83,12 @@ public class RD2LPlayerDataSource : IPlayerDataSource
 
             foreach (var player in players)
             {
+                if (player.Count < 3)
+                {
+                    _logger.LogWarning("No player info found for captain {captain.Name}", captain.Name);
+                    continue;
+                }
+
                 var playerIdRaw = player[3].ToString()?.Replace(@"https://www.opendota.com/players/", "");
                 var playerName = player[0].ToString() ?? PlayerDataSourceConstants.DefaultPlayerName;
 

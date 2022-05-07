@@ -2,7 +2,7 @@
 
 namespace RD2LPowerRankings.Modules.Dota;
 
-public static class DotaRankingKeyValueStores
+public static class DotaRankingKeyValuePairs
 {
     public static List<KeyValuePair<int, string>> ValidLeagues = new()
     {
@@ -34,7 +34,7 @@ public static class DotaRankingKeyValueStores
         new KeyValuePair<int, string>(14107, "Phase Dota Circuit Season 2"),
         new KeyValuePair<int, string>(13807, "League of Lads Season 9"),
         new KeyValuePair<int, string>(13450, "League of Lads Season 8"),
-        new KeyValuePair<int, string>(13177, "League of Lads Season 7"),
+        new KeyValuePair<int, string>(13177, "League of Lads Season 7")
     };
 
     public static readonly List<KeyValuePair<DotaEnums.Badge, decimal>> BadgeWeights =

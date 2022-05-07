@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RD2LPowerRankings.Database.Dota;
@@ -41,10 +42,10 @@ public class OpenDotaDotaDataSource : IDotaDataSource
         {
             await SavePlayer(player.Id, player.Name);
 
-            await SaveMatches(player.Id);
+            await SaveMatches(player.Id, false);
 
             await SaveWords(player.Id);
-            
+
             await ParseReplays();
         }
     }
@@ -117,13 +118,15 @@ public class OpenDotaDotaDataSource : IDotaDataSource
         await _context.Players.Upsert(player).On(x => x.PlayerId).RunAsync();
     }
 
-    private async Task SaveMatches(long playerId)
+    private async Task SaveMatches(long playerId, bool processInParallel)
+
     {
         var response = await
             _httpClient.GetAsync(
                 $"/api/players/{playerId}/matches/" +
                 $"?api_key={_config["OpenDota:ApiKey"]}" +
-                $"&date={DotaDataConstants.MatchRetrievalDays}");
+                $"&date={DotaDataConstants.MatchRetrievalDays}" +
+                "&project=version");
 
         response.EnsureSuccessStatusCode();
 
@@ -149,12 +152,17 @@ public class OpenDotaDotaDataSource : IDotaDataSource
         // Ensure we don't fetch matches that have been loaded or are not relevant.
         matches = await FilterMatches(matches);
 
-        /*await Parallel.ForEachAsync(matches, new ParallelOptions { MaxDegreeOfParallelism = 4 },
-            async (match, cancelToken) => { await GetMatchDetails(match); });*/
-
-        foreach (var match in matches)
+        if (processInParallel)
         {
-            await GetMatchDetails(match);
+            await Parallel.ForEachAsync(matches, new ParallelOptions { MaxDegreeOfParallelism = 8 },
+                async (match, cancelToken) => { await GetMatchDetails(match); });
+        }
+        else
+        {
+            foreach (var match in matches)
+            {
+                await GetMatchDetails(match);
+            }
         }
     }
 
@@ -166,13 +174,15 @@ public class OpenDotaDotaDataSource : IDotaDataSource
                                          or DotaEnums.LobbyType.Ranked
                                          or DotaEnums.LobbyType.Normal
                                          or DotaEnums.LobbyType.Practice &&
-                                     (x.Skill != null || x.GameMode == DotaEnums.GameMode.CaptainsMode))
+                                     (x.Version != null || x.GameMode == DotaEnums.GameMode.CaptainsMode))
             .ToList();
 
 
         var matchIds = matches.Select(x => x.MatchId).ToArray();
 
-        var unparsedMatchIds = _context.UnParsedMatches.Where(x => (x.FailureReason != DotaDataEnums.MatchParseFailureReason.UnparsedReplay) && matchIds.Contains(x.MatchId)).Select(x => x.MatchId)
+        var unparsedMatchIds = _context.UnParsedMatches.Where(x =>
+                x.FailureReason != DotaDataEnums.MatchParseFailureReason.UnparsedReplay && matchIds.Contains(x.MatchId))
+            .Select(x => x.MatchId)
             .ToArray();
 
         // Check to see if these matches already exist / have been completed loaded.
@@ -187,9 +197,6 @@ public class OpenDotaDotaDataSource : IDotaDataSource
 
     private async Task GetMatchDetails(Match match)
     {
-        // Open dota will return 429s if we don't throttle our match parsing :(
-
-
         try
         {
             var response = await
@@ -208,12 +215,20 @@ public class OpenDotaDotaDataSource : IDotaDataSource
 
                 if (unParsedMatch != null)
                 {
-                    await _context.UnParsedMatches.Upsert(new UnParsedMatch { MatchId = match.MatchId, FailureReason = DotaDataEnums.MatchParseFailureReason.MissingReplay, ParseRequestSent = true}).On(x => x.MatchId)
+                    await _context.UnParsedMatches.Upsert(new UnParsedMatch
+                        {
+                            MatchId = match.MatchId,
+                            FailureReason = DotaDataEnums.MatchParseFailureReason.MissingReplay, ParseRequestSent = true
+                        }).On(x => x.MatchId)
                         .RunAsync();
                     return;
                 }
-                
-                await _context.UnParsedMatches.Upsert(new UnParsedMatch { MatchId = match.MatchId, FailureReason = DotaDataEnums.MatchParseFailureReason.UnparsedReplay, ParseRequestSent = false}).On(x => x.MatchId)
+
+                await _context.UnParsedMatches.Upsert(new UnParsedMatch
+                    {
+                        MatchId = match.MatchId, FailureReason = DotaDataEnums.MatchParseFailureReason.UnparsedReplay,
+                        ParseRequestSent = false
+                    }).On(x => x.MatchId)
                     .RunAsync();
 
                 return;
@@ -440,8 +455,12 @@ public class OpenDotaDotaDataSource : IDotaDataSource
         catch (HttpRequestException)
         {
             _logger.LogError("Could not fetch match with id {MatchId}. Adding to unparsed match list", match.MatchId);
-            
-            await _context.UnParsedMatches.Upsert(new UnParsedMatch { MatchId = match.MatchId, FailureReason = DotaDataEnums.MatchParseFailureReason.InternalServerError, ParseRequestSent = false}).On(x => x.MatchId)
+
+            await _context.UnParsedMatches.Upsert(new UnParsedMatch
+                {
+                    MatchId = match.MatchId, FailureReason = DotaDataEnums.MatchParseFailureReason.InternalServerError,
+                    ParseRequestSent = false
+                }).On(x => x.MatchId)
                 .RunAsync();
         }
     }
@@ -449,20 +468,22 @@ public class OpenDotaDotaDataSource : IDotaDataSource
     private async Task ParseReplays()
     {
         var matches = await _context.UnParsedMatches.Where(x =>
-            x.FailureReason == DotaDataEnums.MatchParseFailureReason.UnparsedReplay && x.ParseRequestSent == false).ToListAsync();
-        
+                x.FailureReason == DotaDataEnums.MatchParseFailureReason.UnparsedReplay && x.ParseRequestSent == false)
+            .ToListAsync();
+
         foreach (var match in matches)
         {
             var response = await
                 _httpClient.PostAsync($"/api/request/{match.MatchId}?api_key={_config["OpenDota:ApiKey"]}", null);
-            
+
             response.EnsureSuccessStatusCode();
-            
-            await _context.UnParsedMatches.Upsert(new UnParsedMatch { MatchId = match.MatchId, FailureReason = DotaDataEnums.MatchParseFailureReason.UnparsedReplay, ParseRequestSent = true}).On(x => x.MatchId)
+
+            await _context.UnParsedMatches.Upsert(new UnParsedMatch
+                {
+                    MatchId = match.MatchId, FailureReason = DotaDataEnums.MatchParseFailureReason.UnparsedReplay,
+                    ParseRequestSent = true
+                }).On(x => x.MatchId)
                 .RunAsync();
-          
-            Thread.Sleep(100);
         }
     }
-    
 }

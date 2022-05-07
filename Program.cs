@@ -8,6 +8,7 @@ using RD2LPowerRankings.Database.Dota;
 using RD2LPowerRankings.Modules.Dota;
 using RD2LPowerRankings.Modules.GoogleSheets;
 using RD2LPowerRankings.Services.Common;
+using RD2LPowerRankings.Services.DotaAwards;
 using RD2LPowerRankings.Services.DotaDataSource;
 using RD2LPowerRankings.Services.DotaRanking;
 using RD2LPowerRankings.Services.PlayerDataSource;
@@ -28,7 +29,11 @@ builder.Services.AddTransient<IGoogleSheetsService, GoogleSheetsService>();
 builder.Services.AddTransient<IDotaDataSource, OpenDotaDotaDataSource>();
 builder.Services.AddTransient<IPlayerDataSource, RD2LPlayerDataSource>();
 builder.Services.AddTransient<IDotaRankingService, DotaRankingService>();
+builder.Services.AddTransient<IDotaAwardsService, DotaAwardsService>();
 builder.Services.AddTransient<IPostSeasonAwardService, PostSeasonAwardService>();
+builder.Services.AddTransient<IPlayerReviewService, PlayerReviewService>();
+
+
 builder.Services
     .AddHttpClient<OpenDotaDotaDataSource>()
     .SetHandlerLifetime(TimeSpan.FromMinutes(60))
