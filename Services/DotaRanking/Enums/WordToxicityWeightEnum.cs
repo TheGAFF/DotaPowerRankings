@@ -7,6 +7,7 @@ public partial class DotaEnums
         SlightlyRacist = 100,
         ModeratelyRacist = 200,
         Racist = 1000,
+        Xenophobic = 200,
         RacistFalsePositive = -1000,
         PoliticallyIncorrect = 100,
         Homophobic = 200,

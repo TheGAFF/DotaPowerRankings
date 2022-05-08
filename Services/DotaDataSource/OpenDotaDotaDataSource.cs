@@ -372,7 +372,7 @@ public class OpenDotaDotaDataSource : IDotaDataSource
 
                 if (player["connection_log"] != null)
                 {
-                    foreach (var connection in player["connection_log"])
+                    foreach (var connection in player["connection_log"]!)
                     {
                         if (connection["event"]?.Value<string>() != "disconnect")
                         {
@@ -389,7 +389,7 @@ public class OpenDotaDotaDataSource : IDotaDataSource
                 var abilities = new List<PlayerMatchAbility>();
                 if (player["ability_uses"] != null)
                 {
-                    foreach (dynamic itemRaw in player["ability_uses"])
+                    foreach (dynamic itemRaw in player["ability_uses"]!)
                     {
                         var item = new PlayerMatchAbility();
                         item.Ability = itemRaw.Name;
@@ -406,7 +406,7 @@ public class OpenDotaDotaDataSource : IDotaDataSource
                 var actions = new List<PlayerMatchAction>();
                 if (player["ability_uses"] != null)
                 {
-                    foreach (dynamic itemRaw in player["actions"])
+                    foreach (dynamic itemRaw in player["actions"]!)
                     {
                         var item = new PlayerMatchAction();
                         item.Action = itemRaw.Name;
@@ -421,7 +421,7 @@ public class OpenDotaDotaDataSource : IDotaDataSource
                     .On(x => new { x.PlayerId, x.MatchId, x.Action }).RunAsync();
 
                 var itemUses = new List<PlayerMatchItemUse>();
-                foreach (dynamic itemRaw in player["item_uses"])
+                foreach (dynamic itemRaw in player["item_uses"]!)
                 {
                     var item = new PlayerMatchItemUse();
                     item.Item = itemRaw.Name;
@@ -435,7 +435,7 @@ public class OpenDotaDotaDataSource : IDotaDataSource
                     .On(x => new { x.PlayerId, x.MatchId, x.Item }).RunAsync();
 
                 var firstPurchases = new List<PlayerMatchItemFirstPurchase>();
-                foreach (dynamic itemRaw in player["first_purchase_time"])
+                foreach (dynamic itemRaw in player["first_purchase_time"]!)
                 {
                     var item = new PlayerMatchItemFirstPurchase();
                     item.Item = itemRaw.Name;

@@ -109,11 +109,11 @@ public class PowerRankedPlayer
 
     public DotaEnums.TeamRole? TeamRole { get; set; }
 
-    public string TeamName { get; set; }
+    public string TeamName { get; set; } = null!;
 
     public List<PowerRankedAward> Awards { get; set; } = new();
 
-    public string DivisionName { get; set; }
+    public string DivisionName { get; set; } = null!;
 
     [JsonIgnore] public decimal MatchRussiaPercent { get; set; }
 
@@ -145,7 +145,15 @@ public class PowerRankedPlayer
 
     [JsonIgnore] public decimal AverageLaneEfficiency { get; set; }
 
+    [JsonIgnore] public decimal AverageLaneEfficiencyMid { get; set; }
+
+    [JsonIgnore] public decimal AverageLaneEfficiencyOff { get; set; }
+
+    [JsonIgnore] public decimal AverageLaneEfficiencySafe { get; set; }
+
     [JsonIgnore] public decimal AverageSentriesPlaced { get; set; }
+
+    [JsonIgnore] public decimal AverageArmletToggles { get; set; }
 
     [JsonIgnore] public PostSeasonPlayerScore PostSeasonPlayerScore { get; set; } = new();
 

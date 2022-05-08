@@ -3,5 +3,5 @@
 public class PlayerDataSourceTeam
 {
     public List<PlayerDataSourcePlayer> Players { get; set; } = default!;
-    public string Name { get; set; }
+    public string Name { get; set; } = null!;
 }

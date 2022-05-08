@@ -5,7 +5,7 @@ namespace RD2LPowerRankings.Modules.Dota.Model;
 
 public class PowerRankedTeam
 {
-    public List<PowerRankedPlayer> Players { get; set; }
+    public List<PowerRankedPlayer> Players { get; set; } = new();
 
     [JsonConverter(typeof(DecimalFormatConverter))]
     public decimal TotalScore { get; set; }
@@ -18,7 +18,7 @@ public class PowerRankedTeam
     public int DivisionRank { get; set; }
     public string DivisionName { get; set; } = default!;
 
-    public string Name { get; set; }
+    public string Name { get; set; } = null!;
 
     public List<PowerRankedAward> Awards { get; set; } = new();
 }

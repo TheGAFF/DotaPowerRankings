@@ -10,6 +10,7 @@ using RD2LPowerRankings.Services.DotaDataSource;
 using RD2LPowerRankings.Services.DotaRanking.Enums;
 using RD2LPowerRankings.Services.PlayerDataSource;
 using RD2LPowerRankings.Services.PlayerDataSource.Models;
+using RD2LPowerRankings.Services.PostSeasonAwards;
 
 namespace RD2LPowerRankings.Services.DotaRanking;
 
@@ -123,7 +124,8 @@ public class DotaRankingService : IDotaRankingService
         var playerWords = _context.PlayerWords.AsNoTracking().Where(x => playerIds.Any(y => y == x.PlayerId)).ToList();
         var playerItemUses = _context.PlayerMatchItemUses.AsNoTracking()
             .Where(x => playerIds.Any(y => y == x.PlayerId)).ToList();
-
+        var playerAbilities = _context.PlayerMatchAbilities.AsNoTracking()
+            .Where(x => playerIds.Any(y => y == x.PlayerId)).ToList();
         Parallel.ForEach(playerIds, new ParallelOptions { MaxDegreeOfParallelism = 6 },
             playerId =>
             {
@@ -139,6 +141,7 @@ public class DotaRankingService : IDotaRankingService
                         playerMatches.Where(x => x.PlayerId == playerId).ToList(),
                         playerWords.Where(x => x.PlayerId == playerId).ToList(),
                         playerItemUses.Where(x => x.PlayerId == playerId).ToList(),
+                        playerAbilities.Where(x => x.PlayerId == playerId).ToList(),
                         league,
                         division
                     ));
@@ -151,6 +154,7 @@ public class DotaRankingService : IDotaRankingService
         List<PlayerMatch> playerMatches,
         List<PlayerWord> playerWords,
         List<PlayerMatchItemUse> playerItemUses,
+        List<PlayerMatchAbility> playerMatchAbilities,
         PowerRankedLeague league,
         PowerRankedDivision division)
     {
@@ -158,6 +162,8 @@ public class DotaRankingService : IDotaRankingService
         {
             playerMatch.Match.PlayerMatchItemUses =
                 playerItemUses.Where(x => x.MatchId == playerMatch.MatchId).ToList();
+            playerMatch.Match.PlayerMatchAbilities =
+                playerMatchAbilities.Where(x => x.MatchId == playerMatch.MatchId).ToList();
         }
 
 
@@ -211,122 +217,36 @@ public class DotaRankingService : IDotaRankingService
         powerRankedPlayer.AverageLaneEfficiency =
             (decimal)playerMatches.Where(x => x.LaneEfficiencyPct > 40).Average(x => x.LaneEfficiencyPct);
 
+        powerRankedPlayer.AverageLaneEfficiencyMid =
+            (decimal)playerMatches.Where(x => x.LaneEfficiencyPct > 40 && x.Lane == DotaEnums.Lane.Mid).DefaultIfEmpty()
+                .Average(x => x?.LaneEfficiencyPct ?? 0);
+
+        powerRankedPlayer.AverageLaneEfficiencyOff =
+            (decimal)playerMatches.Where(x => x.LaneEfficiencyPct > 40 && x.Lane == DotaEnums.Lane.Off).DefaultIfEmpty()
+                .Average(x => x?.LaneEfficiencyPct ?? 0);
+
+        powerRankedPlayer.AverageLaneEfficiencySafe =
+            (decimal)playerMatches.Where(x => x.LaneEfficiencyPct > 40 && x.Lane == DotaEnums.Lane.Safe)
+                .DefaultIfEmpty()
+                .Average(x => x?.LaneEfficiencyPct ?? 0);
+
         powerRankedPlayer.AverageSentriesPlaced =
             (decimal)playerMatches.Where(x => x.LaneEfficiencyPct < 40).Average(x => x.SenPlaced);
 
+        powerRankedPlayer.AverageArmletToggles =
+            (decimal)playerMatches.Average(x =>
+                x.Match.PlayerMatchItemUses.Where(y => y.Item == "armlet").Sum(y => y.Uses));
 
-        if (league.LeagueId.HasValue && playerMatches.Count(x => x.LeagueId == league.LeagueId.Value) > 0)
-        {
-            powerRankedPlayer.PostSeasonPlayerScore.Losses =
-                playerMatches.Count(x => x.LeagueId == league.LeagueId.Value && x.Lose);
-            powerRankedPlayer.PostSeasonPlayerScore.Wins =
-                playerMatches.Count(x => x.LeagueId == league.LeagueId.Value && x.Win);
-            powerRankedPlayer.PostSeasonPlayerScore.TotalGames =
-                playerMatches.Count(x => x.LeagueId == league.LeagueId.Value);
-            powerRankedPlayer.PostSeasonPlayerScore.TotalAssists =
-                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.Assists);
-            powerRankedPlayer.PostSeasonPlayerScore.TotalDenies =
-                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.Denies);
-            powerRankedPlayer.PostSeasonPlayerScore.TotalGold =
-                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.TotalGold);
-            powerRankedPlayer.PostSeasonPlayerScore.TotalHealing =
-                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.HeroHealing);
-            powerRankedPlayer.PostSeasonPlayerScore.TotalPings =
-                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.Pings);
-            powerRankedPlayer.PostSeasonPlayerScore.TotalAncientsKilled =
-                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.AncientKills);
-            powerRankedPlayer.PostSeasonPlayerScore.TotalBuyBacks =
-                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.BuyBackCount ?? 0);
-            powerRankedPlayer.PostSeasonPlayerScore.TotalCampsStacked =
-                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.CampsStacked);
-            powerRankedPlayer.PostSeasonPlayerScore.TotalCourierKills =
-                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.CourierKills);
-            powerRankedPlayer.PostSeasonPlayerScore.TotalFirstBloods =
-                playerMatches.Count(x => x.LeagueId == league.LeagueId.Value && x.FirstbloodClaimed);
-            powerRankedPlayer.PostSeasonPlayerScore.TotalLastHits =
-                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.LastHits);
-            powerRankedPlayer.PostSeasonPlayerScore.TotalNeutralKills =
-                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.NeutralKills);
-            powerRankedPlayer.PostSeasonPlayerScore.TotalObsPlaced =
-                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.ObsPlaced);
-            powerRankedPlayer.PostSeasonPlayerScore.TotalRunesPickedUp =
-                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.RunePickups);
-            powerRankedPlayer.PostSeasonPlayerScore.TotalRoshansKilled =
-                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.RoshanKills);
-            powerRankedPlayer.PostSeasonPlayerScore.TotalSentriesPlaced =
-                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.SenPlaced);
-            powerRankedPlayer.PostSeasonPlayerScore.TotalStunSeconds =
-                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.Stuns);
-            powerRankedPlayer.PostSeasonPlayerScore.TotalTimeDead =
-                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.LifeStateDead);
-            powerRankedPlayer.PostSeasonPlayerScore.TotalTowerDamage =
-                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.TowerDamage);
-            powerRankedPlayer.PostSeasonPlayerScore.AverageActionsPerMin =
-                (decimal)playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.ActionsPerMinute) /
-                powerRankedPlayer.PostSeasonPlayerScore.TotalGames * 1M;
-            powerRankedPlayer.PostSeasonPlayerScore.AverageTeamFightParticipation = playerMatches
-                .Where(x => x.LeagueId == league.LeagueId.Value).Average(x => x.TeamfightParticipation);
-            powerRankedPlayer.PostSeasonPlayerScore.AverageLaneEffiencyPct =
-                (decimal)playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.LaneEfficiencyPct) /
-                powerRankedPlayer.PostSeasonPlayerScore.TotalGames * 1M;
-            powerRankedPlayer.PostSeasonPlayerScore.TotalHeroesPlayed =
-                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).GroupBy(x => x.HeroId).Count();
-            powerRankedPlayer.PostSeasonPlayerScore.LongestWonGameLength =
-                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value && x.Win).Max(x => x.Duration);
-            powerRankedPlayer.PostSeasonPlayerScore.ShortestWonGameLength = playerMatches
-                .Where(x => x.LeagueId == league.LeagueId.Value && x.Win && x.Duration > 0).Min(x => x.Duration);
-            powerRankedPlayer.PostSeasonPlayerScore.HighestKDA =
-                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Max(x => x.Kda);
-            powerRankedPlayer.PostSeasonPlayerScore.HighestKDAHero =
-                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).MaxBy(x => x.Kda)!.HeroId;
-
-
-            powerRankedPlayer.PostSeasonPlayerScore.ItemTotalBrownBoots =
-                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value)
-                    .Count(x =>
-                        x.Item0 == DotaEnums.Item.Boots ||
-                        x.Item1 == DotaEnums.Item.Boots ||
-                        x.Item2 == DotaEnums.Item.Boots ||
-                        x.Item3 == DotaEnums.Item.Boots ||
-                        x.Item4 == DotaEnums.Item.Boots ||
-                        x.Item5 == DotaEnums.Item.Boots);
-
-            powerRankedPlayer.PostSeasonPlayerScore.ItemTotalDivineRapiers =
-                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value)
-                    .Count(x =>
-                        x.Item0 == DotaEnums.Item.Rapier ||
-                        x.Item1 == DotaEnums.Item.Rapier ||
-                        x.Item2 == DotaEnums.Item.Rapier ||
-                        x.Item3 == DotaEnums.Item.Rapier ||
-                        x.Item4 == DotaEnums.Item.Rapier ||
-                        x.Item5 == DotaEnums.Item.Rapier);
-
-            powerRankedPlayer.PostSeasonPlayerScore.ItemTotalGemOfTrueSight =
-                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value)
-                    .Count(x =>
-                        x.Item0 == DotaEnums.Item.Gem ||
-                        x.Item1 == DotaEnums.Item.Gem ||
-                        x.Item2 == DotaEnums.Item.Gem ||
-                        x.Item3 == DotaEnums.Item.Gem ||
-                        x.Item4 == DotaEnums.Item.Gem ||
-                        x.Item5 == DotaEnums.Item.Gem);
-        }
-
+        powerRankedPlayer =
+            _postSeasonAwardService.CalculatePostSeasonPlayerScore(powerRankedPlayer, league, playerMatches);
 
         var heroesMatches = playerMatches.GroupBy(x => x.HeroId).Where(x => x.Any()).ToList();
 
         foreach (var heroMatches in heroesMatches)
         {
-            if (league.LeagueId.HasValue)
-            {
-                if (powerRankedPlayer.PostSeasonPlayerScore.MostGamesOnSingleHero <
-                    heroMatches.Count(x => x.LeagueId == league.LeagueId.Value))
-                {
-                    powerRankedPlayer.PostSeasonPlayerScore.MostGamesOnSingleHero =
-                        heroMatches.Count(x => x.LeagueId == league.LeagueId.Value);
-                    powerRankedPlayer.PostSeasonPlayerScore.MostGamesOnSingleHeroId = heroMatches.Key;
-                }
-            }
+            powerRankedPlayer =
+                _postSeasonAwardService.CalculatePostSeasonHeroScore(powerRankedPlayer, league, heroMatches);
+
 
             var hero = new PowerRankedHero();
             hero.HeroId = heroMatches.Key;
@@ -403,7 +323,7 @@ public class DotaRankingService : IDotaRankingService
         return powerRankedPlayer;
     }
 
-    private PowerRankedHero GetHeroScores(PowerRankedHero hero)
+    private static PowerRankedHero GetHeroScores(PowerRankedHero hero)
     {
         // Ignore heroes who have exceptionally low win rates and matches played
         if (hero.WinRate < DotaRankingConstants.PowerRankWinRateThreshold ||
@@ -461,7 +381,7 @@ public class DotaRankingService : IDotaRankingService
         return hero;
     }
 
-    private PowerRankedPlayer GetPlayerScore(PowerRankedPlayer player)
+    private static PowerRankedPlayer GetPlayerScore(PowerRankedPlayer player)
     {
         // Can't calculate player score if there aren't any heroes with scores
         if (!player.Heroes.Any(x => x.Score > 0))
@@ -542,13 +462,13 @@ public class DotaRankingService : IDotaRankingService
         return totalWeights / matchCount;
     }
 
-    private List<DotaEnums.Hero> GetPlayerHeroRespectBans(List<PowerRankedHero> heroes)
+    private static IEnumerable<DotaEnums.Hero> GetPlayerHeroRespectBans(List<PowerRankedHero> heroes)
     {
         return heroes.Where(x => x.MatchesPlayed >= DotaRankingConstants.PowerRankRespectBansThreshold)
-            .OrderByDescending(x => x.Score).Select(x => x.HeroId).ToList();
+            .OrderByDescending(x => x.Score).Select(x => x.HeroId);
     }
 
-    private PowerRankedTeam GetTeamRoles(PowerRankedTeam team)
+    private static PowerRankedTeam GetTeamRoles(PowerRankedTeam team)
     {
         var safeLanePlayer = team.Players.MaxBy(x => x.SafelaneScore);
         if (safeLanePlayer != null)
@@ -600,89 +520,90 @@ public class DotaRankingService : IDotaRankingService
     }
 
 
-    public List<PowerRankedPlayer> RankPlayers(List<PowerRankedPlayer> players, PowerRankedDivision division)
+    private static List<PowerRankedPlayer> RankPlayers(List<PowerRankedPlayer> players,
+        PowerRankedDivision division)
     {
-        foreach (var player in players)
+        var powerRankedPlayers = players.ToList();
+        foreach (var player in powerRankedPlayers)
         {
-            player.SafelaneRank = players.ToList()
+            player.SafelaneRank = powerRankedPlayers.ToList()
                 .OrderByDescending(x => x.SafelaneScore)
                 .ToList().IndexOf(player) + 1;
 
-            player.MidlaneRank = players
+            player.MidlaneRank = powerRankedPlayers
                 .OrderByDescending(x => x.MidlaneScore)
                 .ToList().IndexOf(player) + 1;
 
-            player.OfflaneRank = players
+            player.OfflaneRank = powerRankedPlayers
                 .OrderByDescending(x => x.OfflaneScore)
                 .ToList().IndexOf(player) + 1;
 
-            player.SoftSupportRank = players
+            player.SoftSupportRank = powerRankedPlayers
                 .OrderByDescending(x => x.SoftSupportScore)
                 .ToList().IndexOf(player) + 1;
 
-            player.HardSupportRank = players
+            player.HardSupportRank = powerRankedPlayers
                 .OrderByDescending(x => x.HardSupportScore)
                 .ToList().IndexOf(player) + 1;
 
-            player.RoamingRank = players
+            player.RoamingRank = powerRankedPlayers
                 .OrderByDescending(x => x.RoamingScore)
                 .ToList().IndexOf(player) + 1;
 
-            player.JungleRank = players
+            player.JungleRank = powerRankedPlayers
                 .OrderByDescending(x => x.JungleScore)
                 .ToList().IndexOf(player) + 1;
 
-            player.OverallRank = players
+            player.OverallRank = powerRankedPlayers
                 .OrderByDescending(x => x.OverallScore)
                 .ToList().IndexOf(player) + 1;
 
-            player.ToxicityRank = players
+            player.ToxicityRank = powerRankedPlayers
                 .OrderByDescending(x => x.ToxicityScore)
                 .ToList().IndexOf(player) + 1;
 
-
-            /*player.SafelaneDivisionRank = players
+            player.SafelaneDivisionRank = powerRankedPlayers
                 .Where(z => z.DivisionName == player.DivisionName)
                 .OrderByDescending(x => x.SafelaneScore)
                 .ToList().IndexOf(player) + 1;
 
-            player.MidlaneDivisionRank = players.Where(z => z.DivisionName == player.DivisionName)
+            player.MidlaneDivisionRank = powerRankedPlayers.Where(z => z.DivisionName == player.DivisionName)
                 .OrderByDescending(x => x.MidlaneScore)
                 .ToList().IndexOf(player) + 1;
 
-            player.OfflaneDivisionRank = players.Where(z => z.DivisionName == player.DivisionName)
+            player.OfflaneDivisionRank = powerRankedPlayers.Where(z => z.DivisionName == player.DivisionName)
                 .OrderByDescending(x => x.OfflaneScore)
                 .ToList().IndexOf(player) + 1;
 
-            player.SoftSupportDivisionRank = players.Where(z => z.DivisionName == player.DivisionName)
+            player.SoftSupportDivisionRank = powerRankedPlayers.Where(z => z.DivisionName == player.DivisionName)
                 .OrderByDescending(x => x.SoftSupportScore)
                 .ToList().IndexOf(player) + 1;
 
-            player.HardSupportDivisionRank = players.Where(z => z.DivisionName == player.DivisionName)
+            player.HardSupportDivisionRank = powerRankedPlayers.Where(z => z.DivisionName == player.DivisionName)
                 .OrderByDescending(x => x.HardSupportScore)
                 .ToList().IndexOf(player) + 1;
 
-            player.RoamingDivisionRank = players.Where(z => z.DivisionName == player.DivisionName)
+            player.RoamingDivisionRank = powerRankedPlayers.Where(z => z.DivisionName == player.DivisionName)
                 .OrderByDescending(x => x.RoamingScore)
                 .ToList().IndexOf(player) + 1;
 
-            player.JungleDivisionRank = players.Where(z => z.DivisionName == player.DivisionName)
+            player.JungleDivisionRank = powerRankedPlayers.Where(z => z.DivisionName == player.DivisionName)
                 .OrderByDescending(x => x.JungleScore)
                 .ToList().IndexOf(player) + 1;
 
-            player.OverallDivisionRank = players.Where(z => z.DivisionName == player.DivisionName)
+            player.OverallDivisionRank = powerRankedPlayers.Where(z => z.DivisionName == player.DivisionName)
                 .OrderByDescending(x => x.OverallScore)
                 .ToList().IndexOf(player) + 1;
 
-            player.ToxicityDivisionRank = players.Where(z => z.DivisionName == player.DivisionName)
+            player.ToxicityDivisionRank = powerRankedPlayers.Where(z => z.DivisionName == player.DivisionName)
                 .OrderByDescending(x => x.ToxicityScore)
-                .ToList().IndexOf(player) + 1;*/
+                .ToList().IndexOf(player) + 1;
         }
 
-        return players.Where(x => x.DivisionName == division.Name).ToList();
+        return powerRankedPlayers.Where(x => x.DivisionName == division.Name).ToList();
     }
 
-    private PowerRankedTeam MapTeamSheetToTeam(PowerRankedTeam powerRankedTeam, PlayerDataSourceTeam sheetTeam)
+    private static PowerRankedTeam MapTeamSheetToTeam(PowerRankedTeam powerRankedTeam, PlayerDataSourceTeam sheetTeam)
     {
         var captain = sheetTeam.Players.First(x => x.IsCaptain);
         powerRankedTeam.Players.First(x => x.PlayerId == captain.Id).IsCaptain = true;
@@ -697,7 +618,7 @@ public class DotaRankingService : IDotaRankingService
         return powerRankedTeam;
     }
 
-    private PowerRankedLeague RankTeams(PowerRankedLeague league)
+    private static PowerRankedLeague RankTeams(PowerRankedLeague league)
     {
         foreach (var team in league.Divisions.SelectMany(x => x.Teams))
         {

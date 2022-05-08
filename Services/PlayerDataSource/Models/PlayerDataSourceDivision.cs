@@ -8,8 +8,8 @@ public class PlayerDataSourceDivision
 {
     [Required]
     [DefaultValue("1Ag8ykOJwXRSh7Eq5k3MrMkgg7UGxaBSpYrydk1DjCxo")]
-    public string SheetId { get; set; }
+    public string SheetId { get; set; } = null!;
 
-    [Required] [DefaultValue("EST-TUE")] public string Name { get; set; }
+    [Required] [DefaultValue("EST-TUE")] public string Name { get; set; } = null!;
     [JsonIgnore] [DefaultValue(null)] public List<PlayerDataSourceTeam>? Teams { get; set; }
 }

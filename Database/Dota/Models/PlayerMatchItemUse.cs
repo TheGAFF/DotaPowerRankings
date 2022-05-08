@@ -1,4 +1,6 @@
-﻿namespace RD2LPowerRankings.Database.Dota.Models;
+﻿using RD2LPowerRankings.Services.DotaRanking.Enums;
+
+namespace RD2LPowerRankings.Database.Dota.Models;
 
 public partial class PlayerMatchItemUse
 {

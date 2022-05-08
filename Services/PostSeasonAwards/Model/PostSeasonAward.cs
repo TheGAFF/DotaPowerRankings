@@ -4,11 +4,11 @@ namespace RD2LPowerRankings.Modules.Dota.Model;
 
 public class PostSeasonAward
 {
-    public string Name { get; set; }
-    public string Awardee { get; set; }
-    public string Value { get; set; }
-    public string RunnerUp { get; set; }
-    public string RunnerUpValue { get; set; }
+    public string Name { get; set; } = null!;
+    public string Awardee { get; set; } = null!;
+    public string Value { get; set; } = null!;
+    public string RunnerUp { get; set; } = null!;
+    public string RunnerUpValue { get; set; } = null!;
 
     public DotaEnums.PostSeasonAwardCategory Category { get; set; }
 }

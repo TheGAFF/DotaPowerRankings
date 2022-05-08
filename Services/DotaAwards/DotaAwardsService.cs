@@ -31,7 +31,8 @@ public class DotaAwardsService : IDotaAwardsService
         }
 
         index = 0;
-        foreach (var player in players.OrderByDescending(y => y.Heroes.Count(z => z.MatchesPlayed > 5)).Take(5))
+        foreach (var player in players.OrderByDescending(y => y.Heroes.Count(z => z.MatchesPlayed > 5))
+                     .Take(5))
         {
             player.Awards.Add(new PowerRankedAward($"#{index + 1} Hero Versatility",
                 (DotaEnums.AwardColor)(index < 3 ? index : 3)));
@@ -201,7 +202,34 @@ public class DotaAwardsService : IDotaAwardsService
         foreach (var player in players
                      .OrderByDescending(y => y.AverageLaneEfficiency).Take(5))
         {
-            player.Awards.Add(new PowerRankedAward($"#{index + 1} Best Laner",
+            player.Awards.Add(new PowerRankedAward($"#{index + 1} Best Laner | Overall",
+                DotaEnums.AwardColor.Green));
+            index++;
+        }
+
+        index = 0;
+        foreach (var player in players
+                     .OrderByDescending(y => y.AverageLaneEfficiencySafe).Take(5))
+        {
+            player.Awards.Add(new PowerRankedAward($"#{index + 1} Best Laner | Safe",
+                DotaEnums.AwardColor.Green));
+            index++;
+        }
+
+        index = 0;
+        foreach (var player in players
+                     .OrderByDescending(y => y.AverageLaneEfficiencyOff).Take(5))
+        {
+            player.Awards.Add(new PowerRankedAward($"#{index + 1} Best Laner | Off",
+                DotaEnums.AwardColor.Green));
+            index++;
+        }
+
+        index = 0;
+        foreach (var player in players
+                     .OrderByDescending(y => y.AverageLaneEfficiencyMid).Take(5))
+        {
+            player.Awards.Add(new PowerRankedAward($"#{index + 1} Best Laner | Mid",
                 DotaEnums.AwardColor.Green));
             index++;
         }
@@ -214,8 +242,15 @@ public class DotaAwardsService : IDotaAwardsService
                 DotaEnums.AwardColor.Green));
             index++;
         }
-        
-        
+
+        index = 0;
+        foreach (var player in players
+                     .OrderByDescending(y => y.AverageArmletToggles).Take(1))
+        {
+            player.Awards.Add(new PowerRankedAward($"Best Armlet Toggler",
+                DotaEnums.AwardColor.Green));
+            index++;
+        }
 
         players[0].Awards.Add(new PowerRankedAward("1st to Sign-up", DotaEnums.AwardColor.Gold));
 
@@ -230,7 +265,7 @@ public class DotaAwardsService : IDotaAwardsService
                         : x.Color == DotaEnums.AwardColor.Bronze
                             ? 3
                             : x.Color == DotaEnums.AwardColor.Green
-                                ? 4
+                                ? 0
                                 : x.Color == DotaEnums.AwardColor.Blue
                                     ? 5
                                     : 6).ToList();

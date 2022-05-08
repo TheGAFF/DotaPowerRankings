@@ -12,6 +12,7 @@ using RD2LPowerRankings.Services.DotaAwards;
 using RD2LPowerRankings.Services.DotaDataSource;
 using RD2LPowerRankings.Services.DotaRanking;
 using RD2LPowerRankings.Services.PlayerDataSource;
+using RD2LPowerRankings.Services.PostSeasonAwards;
 
 var builder = WebApplication.CreateBuilder(args);
 

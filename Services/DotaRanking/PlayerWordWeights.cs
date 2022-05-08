@@ -35,7 +35,7 @@ public class PlayerWordWeights
         new KeyValuePair<string, DotaEnums.WordToxicity>("wards", DotaEnums.WordToxicity.NotNiceAtAll),
         new KeyValuePair<string, DotaEnums.WordToxicity>("understand", DotaEnums.WordToxicity.NotNiceAtAll),
         new KeyValuePair<string, DotaEnums.WordToxicity>("pussy", DotaEnums.WordToxicity.Sexist),
-        new KeyValuePair<string, DotaEnums.WordToxicity>("peru", DotaEnums.WordToxicity.ModeratelyRacist),
+        new KeyValuePair<string, DotaEnums.WordToxicity>("peru", DotaEnums.WordToxicity.Xenophobic),
         new KeyValuePair<string, DotaEnums.WordToxicity>("stfu", DotaEnums.WordToxicity.VeryToxic),
         new KeyValuePair<string, DotaEnums.WordToxicity>("brain", DotaEnums.WordToxicity.SlightlyToxic),
         new KeyValuePair<string, DotaEnums.WordToxicity>("mute", DotaEnums.WordToxicity.SlightlyToxic),
@@ -92,6 +92,8 @@ public class PlayerWordWeights
         new KeyValuePair<string, DotaEnums.WordToxicity>("vvodle", DotaEnums.WordToxicity.VeryWholesome),
         new KeyValuePair<string, DotaEnums.WordToxicity>("disrespect", DotaEnums.WordToxicity.NotNiceAtAll),
         new KeyValuePair<string, DotaEnums.WordToxicity>("think", DotaEnums.WordToxicity.NotNiceAtAll),
-        new KeyValuePair<string, DotaEnums.WordToxicity>("typical", DotaEnums.WordToxicity.NotNiceAtAll)
+        new KeyValuePair<string, DotaEnums.WordToxicity>("typical", DotaEnums.WordToxicity.NotNiceAtAll),
+        new KeyValuePair<string, DotaEnums.WordToxicity>("donkey", DotaEnums.WordToxicity.NotNice),
+        new KeyValuePair<string, DotaEnums.WordToxicity>("imagine", DotaEnums.WordToxicity.NotNice)
     };
 }

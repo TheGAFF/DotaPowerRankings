@@ -1,6 +1,7 @@
 ﻿using RD2LPowerRankings.Database.Dota;
 using RD2LPowerRankings.Modules.Dota.Model;
 using RD2LPowerRankings.Services.DotaRanking.Enums;
+using RD2LPowerRankings.Services.PostSeasonAwards;
 
 namespace RD2LPowerRankings.Services.DotaRanking;
 
@@ -29,6 +30,126 @@ public class PostSeasonAwardService : IPostSeasonAwardService
 
 
         return league;
+    }
+
+    public PowerRankedPlayer CalculatePostSeasonPlayerScore(PowerRankedPlayer powerRankedPlayer,
+        PowerRankedLeague league, List<PlayerMatch> playerMatches)
+    {
+        if (league.LeagueId.HasValue && playerMatches.Count(x => x.LeagueId == league.LeagueId.Value) > 0)
+        {
+            powerRankedPlayer.PostSeasonPlayerScore.Losses =
+                playerMatches.Count(x => x.LeagueId == league.LeagueId.Value && x.Lose);
+            powerRankedPlayer.PostSeasonPlayerScore.Wins =
+                playerMatches.Count(x => x.LeagueId == league.LeagueId.Value && x.Win);
+            powerRankedPlayer.PostSeasonPlayerScore.TotalGames =
+                playerMatches.Count(x => x.LeagueId == league.LeagueId.Value);
+            powerRankedPlayer.PostSeasonPlayerScore.TotalAssists =
+                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.Assists);
+            powerRankedPlayer.PostSeasonPlayerScore.TotalDenies =
+                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.Denies);
+            powerRankedPlayer.PostSeasonPlayerScore.TotalGold =
+                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.TotalGold);
+            powerRankedPlayer.PostSeasonPlayerScore.TotalHealing =
+                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.HeroHealing);
+            powerRankedPlayer.PostSeasonPlayerScore.TotalPings =
+                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.Pings);
+            powerRankedPlayer.PostSeasonPlayerScore.TotalAncientsKilled =
+                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.AncientKills);
+            powerRankedPlayer.PostSeasonPlayerScore.TotalBuyBacks =
+                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.BuyBackCount ?? 0);
+            powerRankedPlayer.PostSeasonPlayerScore.TotalCampsStacked =
+                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.CampsStacked);
+            powerRankedPlayer.PostSeasonPlayerScore.TotalCourierKills =
+                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.CourierKills);
+            powerRankedPlayer.PostSeasonPlayerScore.TotalFirstBloods =
+                playerMatches.Count(x => x.LeagueId == league.LeagueId.Value && x.FirstbloodClaimed);
+            powerRankedPlayer.PostSeasonPlayerScore.TotalLastHits =
+                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.LastHits);
+            powerRankedPlayer.PostSeasonPlayerScore.TotalNeutralKills =
+                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.NeutralKills);
+            powerRankedPlayer.PostSeasonPlayerScore.TotalObsPlaced =
+                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.ObsPlaced);
+            powerRankedPlayer.PostSeasonPlayerScore.TotalRunesPickedUp =
+                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.RunePickups);
+            powerRankedPlayer.PostSeasonPlayerScore.TotalRoshansKilled =
+                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.RoshanKills);
+            powerRankedPlayer.PostSeasonPlayerScore.TotalSentriesPlaced =
+                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.SenPlaced);
+            powerRankedPlayer.PostSeasonPlayerScore.TotalStunSeconds =
+                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.Stuns);
+            powerRankedPlayer.PostSeasonPlayerScore.TotalTimeDead =
+                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.LifeStateDead);
+            powerRankedPlayer.PostSeasonPlayerScore.TotalTowerDamage =
+                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.TowerDamage);
+            powerRankedPlayer.PostSeasonPlayerScore.AverageActionsPerMin =
+                (decimal)playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.ActionsPerMinute) /
+                powerRankedPlayer.PostSeasonPlayerScore.TotalGames * 1M;
+            powerRankedPlayer.PostSeasonPlayerScore.AverageTeamFightParticipation = playerMatches
+                .Where(x => x.LeagueId == league.LeagueId.Value).Average(x => x.TeamfightParticipation);
+            powerRankedPlayer.PostSeasonPlayerScore.AverageLaneEffiencyPct =
+                (decimal)playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.LaneEfficiencyPct) /
+                powerRankedPlayer.PostSeasonPlayerScore.TotalGames * 1M;
+            powerRankedPlayer.PostSeasonPlayerScore.TotalHeroesPlayed =
+                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).GroupBy(x => x.HeroId).Count();
+            powerRankedPlayer.PostSeasonPlayerScore.LongestWonGameLength =
+                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value && x.Win).Max(x => x.Duration);
+            powerRankedPlayer.PostSeasonPlayerScore.ShortestWonGameLength = playerMatches
+                .Where(x => x.LeagueId == league.LeagueId.Value && x.Win && x.Duration > 0).Min(x => x.Duration);
+            powerRankedPlayer.PostSeasonPlayerScore.HighestKDA =
+                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Max(x => x.Kda);
+            powerRankedPlayer.PostSeasonPlayerScore.HighestKDAHero =
+                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).MaxBy(x => x.Kda)!.HeroId;
+
+
+            powerRankedPlayer.PostSeasonPlayerScore.ItemTotalBrownBoots =
+                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value)
+                    .Count(x =>
+                        x.Item0 == DotaEnums.Item.Boots ||
+                        x.Item1 == DotaEnums.Item.Boots ||
+                        x.Item2 == DotaEnums.Item.Boots ||
+                        x.Item3 == DotaEnums.Item.Boots ||
+                        x.Item4 == DotaEnums.Item.Boots ||
+                        x.Item5 == DotaEnums.Item.Boots);
+
+            powerRankedPlayer.PostSeasonPlayerScore.ItemTotalDivineRapiers =
+                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value)
+                    .Count(x =>
+                        x.Item0 == DotaEnums.Item.Rapier ||
+                        x.Item1 == DotaEnums.Item.Rapier ||
+                        x.Item2 == DotaEnums.Item.Rapier ||
+                        x.Item3 == DotaEnums.Item.Rapier ||
+                        x.Item4 == DotaEnums.Item.Rapier ||
+                        x.Item5 == DotaEnums.Item.Rapier);
+
+            powerRankedPlayer.PostSeasonPlayerScore.ItemTotalGemOfTrueSight =
+                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value)
+                    .Count(x =>
+                        x.Item0 == DotaEnums.Item.Gem ||
+                        x.Item1 == DotaEnums.Item.Gem ||
+                        x.Item2 == DotaEnums.Item.Gem ||
+                        x.Item3 == DotaEnums.Item.Gem ||
+                        x.Item4 == DotaEnums.Item.Gem ||
+                        x.Item5 == DotaEnums.Item.Gem);
+        }
+
+        return powerRankedPlayer;
+    }
+
+    public PowerRankedPlayer CalculatePostSeasonHeroScore(PowerRankedPlayer powerRankedPlayer, PowerRankedLeague league,
+        IGrouping<DotaEnums.Hero, PlayerMatch> heroMatches)
+    {
+        if (league.LeagueId.HasValue)
+        {
+            if (powerRankedPlayer.PostSeasonPlayerScore.MostGamesOnSingleHero <
+                heroMatches.Count(x => x.LeagueId == league.LeagueId.Value))
+            {
+                powerRankedPlayer.PostSeasonPlayerScore.MostGamesOnSingleHero =
+                    heroMatches.Count(x => x.LeagueId == league.LeagueId.Value);
+                powerRankedPlayer.PostSeasonPlayerScore.MostGamesOnSingleHeroId = heroMatches.Key;
+            }
+        }
+
+        return powerRankedPlayer;
     }
 
     private List<PostSeasonAward> GivePostSeasonAwards(PowerRankedDivision division)
