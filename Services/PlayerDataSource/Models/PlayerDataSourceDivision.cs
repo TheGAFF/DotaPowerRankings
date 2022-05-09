@@ -7,7 +7,7 @@ namespace RD2LPowerRankings.Services.PlayerDataSource.Models;
 public class PlayerDataSourceDivision
 {
     [Required]
-    [DefaultValue("1Ag8ykOJwXRSh7Eq5k3MrMkgg7UGxaBSpYrydk1DjCxo")]
+    [DefaultValue("1ieMbM7lfyIyom4mNbY33KwlRSu0yR2SdmAruCkIqG3I")]
     public string SheetId { get; set; } = null!;
 
     [Required] [DefaultValue("EST-TUE")] public string Name { get; set; } = null!;
