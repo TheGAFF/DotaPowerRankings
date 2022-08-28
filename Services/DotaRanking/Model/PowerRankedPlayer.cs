@@ -25,8 +25,6 @@ public class PowerRankedPlayer
 
     public bool IsCaptain { get; set; }
 
-    [JsonIgnore] public decimal AverageWordToxicity { get; set; }
-
     public int OverallRank { get; set; }
 
     public int MidlaneRank { get; set; }
@@ -95,6 +93,7 @@ public class PowerRankedPlayer
     [JsonConverter(typeof(DecimalFormatConverter))]
     public decimal LaneVersatility { get; set; }
 
+    [JsonIgnore] public decimal AverageWordToxicity { get; set; }
     [JsonIgnore] public decimal FirstBloodAverage { get; set; }
 
     [JsonIgnore] public decimal CourierKillAverage { get; set; }
@@ -154,6 +153,11 @@ public class PowerRankedPlayer
     [JsonIgnore] public decimal AverageSentriesPlaced { get; set; }
 
     [JsonIgnore] public decimal AverageArmletToggles { get; set; }
+
+    [JsonIgnore] public decimal AverageBlinkPurchases { get; set; }
+
+    [JsonIgnore] public decimal AverageRapierPurchases { get; set; }
+
 
     [JsonIgnore] public PostSeasonPlayerScore PostSeasonPlayerScore { get; set; } = new();
 

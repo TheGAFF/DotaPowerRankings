@@ -13,6 +13,14 @@ public class PlayerReviewService : IPlayerReviewService
         _logger = logger;
     }
 
+    public List<PlayerReviewSentence<decimal>> GenerateSentences()
+    {
+        var sentences = new List<PlayerReviewSentence<decimal>>();
+
+
+        return sentences;
+    }
+
     public PowerRankedLeague GeneratePlayerReviews(PowerRankedLeague league)
     {
         var players = league.Divisions.SelectMany(x => x.Teams).SelectMany(x => x.Players).ToList();

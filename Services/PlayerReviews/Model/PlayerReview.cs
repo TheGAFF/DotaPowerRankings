@@ -2,4 +2,5 @@
 
 public class PlayerReview
 {
+    //  public List<PlayerReviewSentence> Sentences { get; set; } = null!;
 }

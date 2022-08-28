@@ -99,7 +99,13 @@ public class PostSeasonAwardService : IPostSeasonAwardService
                 playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Max(x => x.Kda);
             powerRankedPlayer.PostSeasonPlayerScore.HighestKDAHero =
                 playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).MaxBy(x => x.Kda)!.HeroId;
+            powerRankedPlayer.PostSeasonPlayerScore.LowestKDA =
+                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Min(x => x.Kda);
+            powerRankedPlayer.PostSeasonPlayerScore.LowestKDAHero =
+                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).MinBy(x => x.Kda)!.HeroId;
 
+            powerRankedPlayer.PostSeasonPlayerScore.KDAAverage =
+                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Average(x => x.Kda);
 
             powerRankedPlayer.PostSeasonPlayerScore.ItemTotalBrownBoots =
                 playerMatches.Where(x => x.LeagueId == league.LeagueId.Value)
@@ -397,9 +403,9 @@ public class PostSeasonAwardService : IPostSeasonAwardService
             Category = DotaEnums.PostSeasonAwardCategory.Misc,
             Name = "Highest Average Actions Per Minute",
             Awardee = players[0].PersonaName!,
-            Value = $"{players[0].PostSeasonPlayerScore.AverageActionsPerMin:F2}",
+            Value = $"{players[0].PostSeasonPlayerScore.AverageActionsPerMin:0.00}",
             RunnerUp = players[1].PersonaName!,
-            RunnerUpValue = $"{players[1].PostSeasonPlayerScore.AverageActionsPerMin:F2}"
+            RunnerUpValue = $"{players[1].PostSeasonPlayerScore.AverageActionsPerMin:0.00}"
         };
         awards.Add(award);
 
@@ -410,9 +416,9 @@ public class PostSeasonAwardService : IPostSeasonAwardService
             Category = DotaEnums.PostSeasonAwardCategory.Misc,
             Name = "Highest Average Team Fight Participation %",
             Awardee = players[0].PersonaName!,
-            Value = $"{players[0].PostSeasonPlayerScore.AverageTeamFightParticipation * 100:F2}",
+            Value = $"{players[0].PostSeasonPlayerScore.AverageTeamFightParticipation * 100:0.00}",
             RunnerUp = players[1].PersonaName!,
-            RunnerUpValue = $"{players[1].PostSeasonPlayerScore.AverageTeamFightParticipation * 100:F2}"
+            RunnerUpValue = $"{players[1].PostSeasonPlayerScore.AverageTeamFightParticipation * 100:0.00}"
         };
         awards.Add(award);
 
@@ -423,9 +429,9 @@ public class PostSeasonAwardService : IPostSeasonAwardService
             Category = DotaEnums.PostSeasonAwardCategory.Core,
             Name = "Highest Average Lane Efficiency %",
             Awardee = players[0].PersonaName!,
-            Value = $"{players[0].PostSeasonPlayerScore.AverageLaneEffiencyPct:F2}",
+            Value = $"{players[0].PostSeasonPlayerScore.AverageLaneEffiencyPct:0.00}",
             RunnerUp = players[1].PersonaName!,
-            RunnerUpValue = $"{players[1].PostSeasonPlayerScore.AverageLaneEffiencyPct:F2}"
+            RunnerUpValue = $"{players[1].PostSeasonPlayerScore.AverageLaneEffiencyPct:0.00}"
         };
         awards.Add(award);
 
@@ -495,6 +501,68 @@ public class PostSeasonAwardService : IPostSeasonAwardService
             RunnerUpValue = $"{players[1].PostSeasonPlayerScore.ItemTotalGemOfTrueSight}"
         };
         awards.Add(award);
+
+        players = division.Teams.SelectMany(x => x.Players)
+            .OrderByDescending(x => x.PostSeasonPlayerScore.KDAAverage).Take(2).ToArray();
+        award = new PostSeasonAward
+        {
+            Category = DotaEnums.PostSeasonAwardCategory.Misc,
+            Name = "Highest KDA Average",
+            Awardee = players[0].PersonaName!,
+            Value =
+                $"{players[0].PostSeasonPlayerScore.KDAAverage:0.00}",
+            RunnerUp = players[1].PersonaName!,
+            RunnerUpValue =
+                $"{players[1].PostSeasonPlayerScore.KDAAverage:0.00}"
+        };
+        awards.Add(award);
+
+        players = division.Teams.SelectMany(x => x.Players)
+            .Where(x => x.PostSeasonPlayerScore.KDAAverage > 0)
+            .OrderBy(x => x.PostSeasonPlayerScore.KDAAverage).Take(2).ToArray();
+        award = new PostSeasonAward
+        {
+            Category = DotaEnums.PostSeasonAwardCategory.Misc,
+            Name = "Lowest KDA Average",
+            Awardee = players[0].PersonaName!,
+            Value =
+                $"{players[0].PostSeasonPlayerScore.KDAAverage:0.00}",
+            RunnerUp = players[1].PersonaName!,
+            RunnerUpValue =
+                $"{players[1].PostSeasonPlayerScore.KDAAverage:0.00}"
+        };
+        awards.Add(award);
+
+        players = division.Teams.SelectMany(x => x.Players)
+            .OrderByDescending(x => x.PostSeasonPlayerScore.HighestKDA).Take(2).ToArray();
+        award = new PostSeasonAward
+        {
+            Category = DotaEnums.PostSeasonAwardCategory.Misc,
+            Name = "Highest KDA in a single game",
+            Awardee = players[0].PersonaName!,
+            Value =
+                $"{players[0].PostSeasonPlayerScore.HighestKDA:0.00} | {players[0].PostSeasonPlayerScore.HighestKDAHero}",
+            RunnerUp = players[1].PersonaName!,
+            RunnerUpValue =
+                $"{players[1].PostSeasonPlayerScore.HighestKDA:0.00} | {players[1].PostSeasonPlayerScore.HighestKDAHero}"
+        };
+        awards.Add(award);
+
+        players = division.Teams.SelectMany(x => x.Players)
+            .OrderByDescending(x => x.PostSeasonPlayerScore.LowestKDA).Take(2).ToArray();
+        award = new PostSeasonAward
+        {
+            Category = DotaEnums.PostSeasonAwardCategory.Misc,
+            Name = "Lowest KDA in a single game",
+            Awardee = players[0].PersonaName!,
+            Value =
+                $"{players[0].PostSeasonPlayerScore.LowestKDA:0.00} | {players[0].PostSeasonPlayerScore.LowestKDAHero}",
+            RunnerUp = players[1].PersonaName!,
+            RunnerUpValue =
+                $"{players[1].PostSeasonPlayerScore.LowestKDA:0.00} | {players[1].PostSeasonPlayerScore.LowestKDAHero}"
+        };
+        awards.Add(award);
+
 
         var teams = division.Teams.OrderBy(x =>
             x.Players.Max(y => y.PostSeasonPlayerScore.TotalGames) -

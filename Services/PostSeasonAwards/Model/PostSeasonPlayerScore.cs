@@ -26,32 +26,30 @@ public class PostSeasonPlayerScore
     public int TotalLastHits { get; set; }
     public long TotalHealing { get; set; }
     public int TotalAssists { get; set; }
-    
+
     public decimal AverageTeamFightParticipation { get; set; }
     public decimal AverageActionsPerMin { get; set; }
     public decimal AverageLaneEffiencyPct { get; set; }
-    
+
     public int ItemTotalDivineRapiers { get; set; }
-    
+
     public int ItemTotalGemOfTrueSight { get; set; }
-    
+
     public int ItemTotalBrownBoots { get; set; }
-    
+
     public int TotalHeroesPlayed { get; set; }
-    
+
     public long LongestWonGameLength { get; set; }
     public long ShortestWonGameLength { get; set; }
-    
+
     public decimal HighestKDA { get; set; }
     public DotaEnums.Hero HighestKDAHero { get; set; }
-    
+
+    public decimal LowestKDA { get; set; }
+    public DotaEnums.Hero LowestKDAHero { get; set; }
+
+    public decimal KDAAverage { get; set; }
+
     public int MostGamesOnSingleHero { get; set; }
     public DotaEnums.Hero MostGamesOnSingleHeroId { get; set; }
-    
-    
-    
-    
-    
-
-
 }

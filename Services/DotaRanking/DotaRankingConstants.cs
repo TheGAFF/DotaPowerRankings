@@ -27,8 +27,8 @@ public static class DotaRankingConstants
     public const int ExcessivePingThreshold = 50;
 
     public const decimal TeamSafelaneScoreFactor = 1.0M;
-    public const decimal TeamMidlaneScoreFactor = 0.7M;
-    public const decimal TeamOfflaneScoreFactor = 0.4M;
-    public const decimal TeamSoftSupportScoreFactor = 0.2M;
-    public const decimal TeamHardSupportScoreFactor = 0.1M;
+    public const decimal TeamMidlaneScoreFactor = 0.9M;
+    public const decimal TeamOfflaneScoreFactor = 0.7M;
+    public const decimal TeamSoftSupportScoreFactor = 0.5M;
+    public const decimal TeamHardSupportScoreFactor = 0.4M;
 }

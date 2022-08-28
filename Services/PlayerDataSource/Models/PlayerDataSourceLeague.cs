@@ -12,5 +12,5 @@ public class PlayerDataSourceLeague
     [Required] public List<PlayerDataSourceDivision> Divisions { get; set; } = new();
 
 
-    [DefaultValue(13780)] public int? LeagueId { get; set; }
+    [DefaultValue(14137)] public int? LeagueId { get; set; }
 }

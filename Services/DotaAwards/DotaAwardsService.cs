@@ -401,6 +401,10 @@ public class DotaAwardsService : IDotaAwardsService
             .Awards
             .Add(new PowerRankedAward("Bathroom Gamers", DotaEnums.AwardColor.Red));
 
+        division.Teams
+            .OrderByDescending(x => x.Players.Sum(y => y.AverageLaneEfficiency)).First()
+            .Awards
+            .Add(new PowerRankedAward("Best Laners", DotaEnums.AwardColor.Green));
 
         return division;
     }

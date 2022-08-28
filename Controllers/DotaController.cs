@@ -33,7 +33,7 @@ public class DotaController : ControllerBase
     /// <returns></returns>
     [HttpGet(Name = "LoadPlayerData")]
     public async Task<bool> LoadPlayerData(
-        [DefaultValue("1ieMbM7lfyIyom4mNbY33KwlRSu0yR2SdmAruCkIqG3I")]
+        [DefaultValue("1P61G8dOFHfFR78CVHADrlkYwotLnDyoFer76fkQMHn8")]
         string sheetId)
     {
         _logger.LogInformation($"{nameof(LoadPlayerData)} Started");

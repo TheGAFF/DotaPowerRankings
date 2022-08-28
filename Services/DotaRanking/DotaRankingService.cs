@@ -87,10 +87,10 @@ public class DotaRankingService : IDotaRankingService
                 powerRankedDivision.Teams.Add(powerRankedTeam);
             }
 
-            powerRankedDivision.Players = RankPlayers(powerRankedLeague.Divisions.SelectMany(x => x.Players).ToList(),
+            RankPlayers(powerRankedDivision.Teams.SelectMany(x => x.Players).ToList(),
                 powerRankedDivision);
 
-            powerRankedDivision.Players = _dotaAwardsService.GiveDivisionPlayerAwards(powerRankedDivision.Players);
+            _dotaAwardsService.GiveDivisionPlayerAwards(powerRankedDivision.Teams.SelectMany(x => x.Players).ToList());
 
             powerRankedDivision = _dotaAwardsService.GiveDivisionTeamAwards(powerRankedDivision);
 
@@ -236,6 +236,7 @@ public class DotaRankingService : IDotaRankingService
         powerRankedPlayer.AverageArmletToggles =
             (decimal)playerMatches.Average(x =>
                 x.Match.PlayerMatchItemUses.Where(y => y.Item == "armlet").Sum(y => y.Uses));
+
 
         powerRankedPlayer =
             _postSeasonAwardService.CalculatePostSeasonPlayerScore(powerRankedPlayer, league, playerMatches);
