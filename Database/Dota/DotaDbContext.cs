@@ -13,8 +13,6 @@ public class DotaDbContext : DbContext
     public virtual DbSet<Player> Players { get; set; } = null!;
     public virtual DbSet<PlayerMatch> PlayerMatches { get; set; } = null!;
     public virtual DbSet<PlayerMatchAbility> PlayerMatchAbilities { get; set; } = null!;
-    public virtual DbSet<PlayerMatchAction> PlayerMatchActions { get; set; } = null!;
-    public virtual DbSet<PlayerMatchItemFirstPurchase> PlayerMatchItemFirstPurchases { get; set; } = null!;
     public virtual DbSet<PlayerMatchItemUse> PlayerMatchItemUses { get; set; } = null!;
     public virtual DbSet<PlayerWord> PlayerWords { get; set; } = null!;
     public virtual DbSet<UnParsedMatch> UnParsedMatches { get; set; } = null!;
@@ -25,11 +23,11 @@ public class DotaDbContext : DbContext
         {
             entity.HasIndex(e => e.GameMode, "IX_Matches_GameMode");
 
-            entity.HasIndex(e => e.Leagueid, "IX_Matches_Leagueid");
+            entity.HasIndex(e => e.LeagueId, "IX_Matches_LeagueId");
 
             entity.HasIndex(e => e.LobbyType, "IX_Matches_LobbyType");
 
-            entity.HasIndex(e => e.Skill, "IX_Matches_Skill");
+            entity.HasIndex(e => e.Rank, "IX_Matches_Rank");
 
             entity.Property(e => e.MatchId).ValueGeneratedNever();
         });
@@ -53,8 +51,6 @@ public class DotaDbContext : DbContext
 
             entity.HasIndex(e => e.PlayerId, "IX_PlayerMatches_PlayerId");
 
-            entity.HasIndex(e => e.PlayerSlot, "IX_PlayerMatches_PlayerSlot");
-
             entity.HasIndex(e => e.StartTime, "IX_PlayerMatches_StartTime");
 
             entity.HasOne(d => d.Match)
@@ -64,7 +60,7 @@ public class DotaDbContext : DbContext
 
         modelBuilder.Entity<PlayerMatchAbility>(entity =>
         {
-            entity.HasKey(e => new { e.PlayerId, e.MatchId, e.Ability });
+            entity.HasKey(e => new { e.PlayerId, e.MatchId, e.AbilityId });
 
             entity.HasIndex(e => e.MatchId, "IX_PlayerMatchAbilities_MatchId");
 
@@ -75,35 +71,9 @@ public class DotaDbContext : DbContext
                 .HasForeignKey(d => d.MatchId);
         });
 
-        modelBuilder.Entity<PlayerMatchAction>(entity =>
-        {
-            entity.HasKey(e => new { e.PlayerId, e.MatchId, e.Action });
-
-            entity.HasIndex(e => e.MatchId, "IX_PlayerMatchActions_MatchId");
-
-            entity.HasIndex(e => e.PlayerId, "IX_PlayerMatchActions_PlayerId");
-
-            entity.HasOne(d => d.Match)
-                .WithMany(p => p.PlayerMatchActions)
-                .HasForeignKey(d => d.MatchId);
-        });
-
-        modelBuilder.Entity<PlayerMatchItemFirstPurchase>(entity =>
-        {
-            entity.HasKey(e => new { e.PlayerId, e.MatchId, e.Item });
-
-            entity.HasIndex(e => e.MatchId, "IX_PlayerMatchItemFirstPurchases_MatchId");
-
-            entity.HasIndex(e => e.PlayerId, "IX_PlayerMatchItemFirstPurchases_PlayerId");
-
-            entity.HasOne(d => d.Match)
-                .WithMany(p => p.PlayerMatchItemFirstPurchases)
-                .HasForeignKey(d => d.MatchId);
-        });
-
         modelBuilder.Entity<PlayerMatchItemUse>(entity =>
         {
-            entity.HasKey(e => new { e.PlayerId, e.MatchId, e.Item });
+            entity.HasKey(e => new { e.PlayerId, e.MatchId, e.ItemId });
 
             entity.HasIndex(e => e.MatchId, "IX_PlayerMatchItemUses_MatchId");
 

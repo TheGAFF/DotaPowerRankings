@@ -27,23 +27,24 @@ builder.Services.AddDbContext<DotaDbContext>(x =>
     x.UseNpgsql(builder.Configuration.GetConnectionString("DotaPowerRankings")), ServiceLifetime.Transient);
 
 builder.Services.AddTransient<IGoogleSheetsService, GoogleSheetsService>();
-builder.Services.AddTransient<IDotaDataSource, OpenDotaDotaDataSource>();
+builder.Services.AddTransient<IDotaDataSource, StratzDotaDataSource>();
+builder.Services.AddTransient<IDotaExtendedDataSource, OpenDotaExtendedDataSource>();
 builder.Services.AddTransient<IPlayerDataSource, RD2LPlayerDataSource>();
 builder.Services.AddTransient<IDotaRankingService, DotaRankingService>();
 builder.Services.AddTransient<IDotaAwardsService, DotaAwardsService>();
 builder.Services.AddTransient<IPostSeasonAwardService, PostSeasonAwardService>();
-builder.Services.AddTransient<IPlayerReviewService, PlayerReviewService>();
+builder.Services.AddTransient<IOpenAIService, OpenAIService>();
 
 
 builder.Services
-    .AddHttpClient<OpenDotaDotaDataSource>()
+    .AddHttpClient<OpenDotaExtendedDataSource>()
     .SetHandlerLifetime(TimeSpan.FromMinutes(60))
     .AddPolicyHandler((services, request) => HttpPolicyExtensions.HandleTransientHttpError()
         .OrResult(response => response.StatusCode == HttpStatusCode.TooManyRequests)
         .WaitAndRetryAsync(HttpRetryPolicies.GetBasicJitterRetryPolicy(),
             (outcome, timespan, retryAttempt, context) =>
             {
-                services.GetService<ILogger<OpenDotaDotaDataSource>>()?
+                services.GetService<ILogger<OpenDotaExtendedDataSource>>()?
                     .LogWarning("Delaying for {Delay}secs, then making retry #{Retry}", timespan.Seconds,
                         retryAttempt);
             }

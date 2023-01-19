@@ -13,6 +13,7 @@ public partial class DotaEnums
         RankedSoloMM = 6,
         Ranked = 7,
         OneVsOneMid = 8,
-        BattleCup = 9
+        BattleCup = 9,
+        Unknown = -1
     }
 }

@@ -6,10 +6,9 @@ namespace RD2LPowerRankings;
 
 public partial class PlayerMatchAbility
 {
-    public string Ability { get; set; } = null!;
     public long MatchId { get; set; }
     public long PlayerId { get; set; }
     public long Count { get; set; }
-
+    public long AbilityId { get; set; }
     public virtual Match Match { get; set; } = null!;
 }

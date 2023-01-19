@@ -4,7 +4,7 @@ namespace RD2LPowerRankings.Database.Dota.Models;
 
 public partial class PlayerMatchItemUse
 {
-    public string Item { get; set; } = null!;
+    public long ItemId { get; set; }
     public long MatchId { get; set; }
     public long PlayerId { get; set; }
     public long Uses { get; set; }

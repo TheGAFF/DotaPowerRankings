@@ -170,6 +170,11 @@ public class DotaRankingService : IDotaRankingService
         var powerRankedPlayer = _mapper.Map<PowerRankedPlayer>(player);
         powerRankedPlayer.DivisionName = division.Name;
 
+        if (playerMatches.Count == 0)
+        {
+            return powerRankedPlayer;
+        }
+
         powerRankedPlayer.AverageWordToxicity = GetPlayerAverageWordToxicity(playerWords, playerMatches.Count);
 
         powerRankedPlayer.FirstBloodAverage =
@@ -178,8 +183,8 @@ public class DotaRankingService : IDotaRankingService
         powerRankedPlayer.CourierKillAverage =
             (decimal)playerMatches.Sum(x => x.CourierKills) / playerMatches.Count;
 
-        powerRankedPlayer.CreepsStackedAverage =
-            (decimal)playerMatches.Sum(x => x.CreepsStacked) / playerMatches.Count;
+        powerRankedPlayer.CampsStackedAverage =
+            (decimal)playerMatches.Sum(x => x.CampsStacked) / playerMatches.Count;
 
         powerRankedPlayer.DeniesAverage =
             (decimal)playerMatches.Sum(x => x.Denies) / playerMatches.Count;
@@ -209,10 +214,9 @@ public class DotaRankingService : IDotaRankingService
                 .Sum(x => x.Pings) / playerMatches.Count;
 
         powerRankedPlayer.AverageTeamFightParticipation = playerMatches.Average(x => x.TeamfightParticipation);
-        powerRankedPlayer.AverageStuns = playerMatches.Average(x => x.Stuns);
+        powerRankedPlayer.AverageStuns = playerMatches.Average(x => x.StunDuration * 1M);
         powerRankedPlayer.AverageAPM = (decimal)playerMatches.Average(x => x.ActionsPerMinute);
         powerRankedPlayer.AverageTowerDamage = (decimal)playerMatches.Average(x => x.TowerDamage);
-        powerRankedPlayer.AverageDisconnects = (decimal)playerMatches.Average(x => x.DisconnectCount);
 
         powerRankedPlayer.AverageLaneEfficiency =
             (decimal)playerMatches.Where(x => x.LaneEfficiencyPct > 40).Average(x => x.LaneEfficiencyPct);
@@ -231,11 +235,12 @@ public class DotaRankingService : IDotaRankingService
                 .Average(x => x?.LaneEfficiencyPct ?? 0);
 
         powerRankedPlayer.AverageSentriesPlaced =
-            (decimal)playerMatches.Where(x => x.LaneEfficiencyPct < 40).Average(x => x.SenPlaced);
+            (decimal)playerMatches.Where(x => x.LaneEfficiencyPct < 40).Select(x => x.SenPlaced).DefaultIfEmpty(0)
+                .Average();
 
         powerRankedPlayer.AverageArmletToggles =
             (decimal)playerMatches.Average(x =>
-                x.Match.PlayerMatchItemUses.Where(y => y.Item == "armlet").Sum(y => y.Uses));
+                x.Match.PlayerMatchItemUses.Where(y => y.ItemId == (int)DotaEnums.Item.Armlet).Sum(y => y.Uses));
 
 
         powerRankedPlayer =
@@ -258,25 +263,26 @@ public class DotaRankingService : IDotaRankingService
             hero.MatchesPlayed = heroMatches.Count();
             hero.KDA = heroMatches.Average(x => x.Kda);
             hero.MidlanePercent =
-                (decimal)heroMatches.Count(x => x.LaneRole == (int)DotaEnums.Lane.Mid && !x.IsRoaming) /
+                (decimal)heroMatches.Count(x => x.Lane == DotaEnums.Lane.Mid) /
                 heroMatches.Count() * 1M;
             hero.SafelanePercent =
-                (decimal)heroMatches.Count(x => x.LaneRole == (int)DotaEnums.Lane.Safe && !x.IsRoaming) /
+                (decimal)heroMatches.Count(x =>
+                    x.Lane == DotaEnums.Lane.Safe && x.LaneRole == DotaEnums.TeamRole.Safelane) /
                 heroMatches.Count() * 1M;
             hero.JunglePercent =
-                (decimal)heroMatches.Count(x => x.LaneRole == (int)DotaEnums.Lane.Jungle && !x.IsRoaming) /
+                (decimal)heroMatches.Count(x => x.Lane == DotaEnums.Lane.Jungle) /
                 heroMatches.Count() * 1M;
             hero.OfflanePercent =
                 (decimal)heroMatches.Count(x =>
-                    x.LaneRole == (int)DotaEnums.Lane.Off && !x.IsRoaming && x.LaneEfficiencyPct >= 40) /
+                    x.Lane == DotaEnums.Lane.Off && x.LaneRole == DotaEnums.TeamRole.Offlane) /
                 heroMatches.Count() * 1M;
 
             hero.SoftSupportPercent = (decimal)heroMatches.Count(x =>
-                    x.IsRoaming || (x.LaneRole == (int)DotaEnums.Lane.Off && x.LaneEfficiencyPct < 40)) /
+                    x.LaneRole == DotaEnums.TeamRole.SoftSupport) /
                 heroMatches.Count() * 1M;
 
             hero.HardSupportPercent =
-                (decimal)heroMatches.Count(x => x.LaneRole == (int)DotaEnums.Lane.Safe && x.LaneEfficiencyPct < 40) /
+                (decimal)heroMatches.Count(x => x.LaneRole == DotaEnums.TeamRole.HardSupport) /
                 heroMatches.Count() * 1M;
 
             hero.RoamingPercent =
@@ -287,23 +293,23 @@ public class DotaRankingService : IDotaRankingService
                 heroMatches.Count() * 1M;
 
             hero.SkillAverageBadge =
-                Convert.ToInt32(heroMatches.Where(x => x.RankTier != null && x.RankTier != 0)
-                    .Average(x => x.RankTier ?? 0M));
+                Convert.ToInt32(heroMatches.Where(x => x.MatchRank != null && x.MatchRank != 0)
+                    .Average(x => x.MatchRank ?? 0M));
 
             hero.SoloNormalMatchMakingPercent =
-                (decimal)heroMatches.Count(x => x.LobbyType == DotaEnums.LobbyType.Normal && x.PartySize < 2) /
+                (decimal)heroMatches.Count(x => x.LobbyType == DotaEnums.LobbyType.Normal && x.PartyId == null) /
                 heroMatches.Count() * 1M;
 
             hero.SoloRankedMatchMakingPercent =
-                (decimal)heroMatches.Count(x => x.LobbyType == DotaEnums.LobbyType.Ranked && x.PartySize < 2) /
+                (decimal)heroMatches.Count(x => x.LobbyType == DotaEnums.LobbyType.Ranked && x.PartyId == null) /
                 heroMatches.Count() * 1M;
 
             hero.PartyNormalMatchMakingPercent =
-                (decimal)heroMatches.Count(x => x.LobbyType == DotaEnums.LobbyType.Normal && x.PartySize > 1) /
+                (decimal)heroMatches.Count(x => x.LobbyType == DotaEnums.LobbyType.Normal && x.PartyId != null) /
                 heroMatches.Count() * 1M;
 
             hero.PartyRankedMatchMakingPercent =
-                (decimal)heroMatches.Count(x => x.LobbyType == DotaEnums.LobbyType.Ranked && x.PartySize > 1) /
+                (decimal)heroMatches.Count(x => x.LobbyType == DotaEnums.LobbyType.Ranked && x.PartyId != null) /
                 heroMatches.Count() * 1M;
 
             hero.BattleCupMatchMakingPercent =

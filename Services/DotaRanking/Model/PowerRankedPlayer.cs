@@ -98,7 +98,7 @@ public class PowerRankedPlayer
 
     [JsonIgnore] public decimal CourierKillAverage { get; set; }
 
-    [JsonIgnore] public decimal CreepsStackedAverage { get; set; }
+    [JsonIgnore] public decimal CampsStackedAverage { get; set; }
 
     [JsonIgnore] public decimal DeniesAverage { get; set; }
 
@@ -139,8 +139,6 @@ public class PowerRankedPlayer
     [JsonIgnore] public decimal AverageStuns { get; set; }
 
     [JsonIgnore] public decimal AverageTeamFightParticipation { get; set; }
-
-    [JsonIgnore] public decimal AverageDisconnects { get; set; }
 
     [JsonIgnore] public decimal AverageLaneEfficiency { get; set; }
 

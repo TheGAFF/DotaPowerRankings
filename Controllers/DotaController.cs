@@ -13,17 +13,20 @@ namespace RD2LPowerRankings.Controllers;
 public class DotaController : ControllerBase
 {
     private readonly IDotaDataSource _dotaDataSource;
+    private readonly IDotaExtendedDataSource _dotaExtendedDataSource;
     private readonly IDotaRankingService _dotaRankingService;
     private readonly ILogger<DotaController> _logger;
     private readonly IWebHostEnvironment _webHostEnvironment;
 
     public DotaController(ILogger<DotaController> logger, IDotaDataSource dotaDataSource,
-        IDotaRankingService dotaRankingService, IWebHostEnvironment webHostEnvironment)
+        IDotaRankingService dotaRankingService, IWebHostEnvironment webHostEnvironment,
+        IDotaExtendedDataSource dotaExtendedDataSource)
     {
         _logger = logger;
         _dotaDataSource = dotaDataSource;
         _dotaRankingService = dotaRankingService;
         _webHostEnvironment = webHostEnvironment;
+        _dotaExtendedDataSource = dotaExtendedDataSource;
     }
 
     /// <summary>
@@ -33,12 +36,14 @@ public class DotaController : ControllerBase
     /// <returns></returns>
     [HttpGet(Name = "LoadPlayerData")]
     public async Task<bool> LoadPlayerData(
-        [DefaultValue("1P61G8dOFHfFR78CVHADrlkYwotLnDyoFer76fkQMHn8")]
+        [DefaultValue("1lyjRuB0G6uFUJtVpeDMYOnXG01vrJrYhvD-_f3pLxp0")]
         string sheetId)
     {
         _logger.LogInformation($"{nameof(LoadPlayerData)} Started");
 
-        await _dotaDataSource.LoadPlayerData(sheetId);
+        // await _dotaDataSource.LoadPlayerData(sheetId);
+
+        await _dotaExtendedDataSource.LoadExtendedPlayerData(sheetId);
 
         _logger.LogInformation($"{nameof(LoadPlayerData)} Finished");
         return true;
