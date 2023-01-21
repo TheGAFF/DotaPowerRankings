@@ -24,12 +24,11 @@ public partial class Player
     public int? RankTier { get; set; }
     public int? MmrEstimate { get; set; }
     public int? SmurfFlag { get; set; }
-
     public int? SoloRank { get; set; }
-
     public int? PartyRank { get; set; }
-
     public int? LastMatchParseDate { get; set; }
     public int? BehaviorScore { get; set; }
+
+    public string? Description { get; set; }
     public virtual ICollection<PlayerWord> PlayerWords { get; set; }
 }

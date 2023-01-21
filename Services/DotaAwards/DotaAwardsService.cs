@@ -15,7 +15,8 @@ public class DotaAwardsService : IDotaAwardsService
 
             foreach (var player in players
                          .OrderByDescending(y =>
-                             y.Heroes.FirstOrDefault(z => z.HeroId == hero && z.MatchesPlayed > 3)?.Score ?? 0).Take(3))
+                             y.Heroes.FirstOrDefault(z => z.HeroId == hero && z.MatchesPlayed > 3)?.TotalScore ?? 0)
+                         .Take(3))
             {
                 player.Awards.Add(new PowerRankedAward(
                     $"#{index + 1} {Enum.GetName(hero)?.Replace("_", " ")} ",
@@ -47,7 +48,14 @@ public class DotaAwardsService : IDotaAwardsService
         }
 
         index = 0;
-        foreach (var player in players.Where(x => x.Heroes.Any(y => y.Score > 0))
+        foreach (var player in players.OrderByDescending(y => y.AverageIntentionalFeeding).Take(3))
+        {
+            player.Awards.Add(new PowerRankedAward($"#{index + 1} Intentional Feeder", DotaEnums.AwardColor.Red));
+            index++;
+        }
+
+        index = 0;
+        foreach (var player in players.Where(x => x.Heroes.Any(y => y.TotalScore > 0))
                      .OrderByDescending(y => y.Heroes.Average(z => z.KDA)).Take(5))
         {
             player.Awards.Add(new PowerRankedAward($"#{index + 1} Highest Avg KDA",
@@ -56,8 +64,8 @@ public class DotaAwardsService : IDotaAwardsService
         }
 
         index = 0;
-        foreach (var player in players.Where(x => x.Heroes.Any(y => y.Score > 0))
-                     .OrderByDescending(y => y.Heroes.Where(z => z.Score > 0).Average(z => z.WinRate)).Take(5))
+        foreach (var player in players.Where(x => x.Heroes.Any(y => y.TotalScore > 0))
+                     .OrderByDescending(y => y.Heroes.Where(z => z.TotalScore > 0).Average(z => z.WinRate)).Take(5))
         {
             player.Awards.Add(new PowerRankedAward($"#{index + 1} Highest win rate",
                 (DotaEnums.AwardColor)(index < 3 ? index : 3)));
@@ -65,8 +73,8 @@ public class DotaAwardsService : IDotaAwardsService
         }
 
         index = 0;
-        foreach (var player in players.Where(x => x.Heroes.Any(y => y.Score > 0))
-                     .OrderBy(y => y.Heroes.Where(z => z.Score > 0).Average(z => z.WinRate)).Take(5))
+        foreach (var player in players.Where(x => x.Heroes.Any(y => y.TotalScore > 0))
+                     .OrderBy(y => y.Heroes.Where(z => z.TotalScore > 0).Average(z => z.WinRate)).Take(5))
         {
             player.Awards.Add(new PowerRankedAward($"#{index + 1} Lowest win rate", DotaEnums.AwardColor.Red));
             index++;
@@ -89,6 +97,52 @@ public class DotaAwardsService : IDotaAwardsService
                 (DotaEnums.AwardColor)(index < 3 ? index : 3)));
             index++;
         }
+
+        index = 0;
+        foreach (var player in players
+                     .OrderByDescending(y => y.AverageGankKills).Take(5))
+        {
+            player.Awards.Add(new PowerRankedAward($"#{index + 1} Gank Kill avg",
+                (DotaEnums.AwardColor)(index < 3 ? index : 3)));
+            index++;
+        }
+
+        index = 0;
+        foreach (var player in players
+                     .OrderByDescending(y => y.AverageSmokeKills).Take(5))
+        {
+            player.Awards.Add(new PowerRankedAward($"#{index + 1} Smoke Kill avg",
+                (DotaEnums.AwardColor)(index < 3 ? index : 3)));
+            index++;
+        }
+
+        index = 0;
+        foreach (var player in players
+                     .OrderByDescending(y => y.AverageInvisibleKills).Take(5))
+        {
+            player.Awards.Add(new PowerRankedAward($"#{index + 1} Invis Kill avg",
+                (DotaEnums.AwardColor)(index < 3 ? index : 3)));
+            index++;
+        }
+
+        index = 0;
+        foreach (var player in players
+                     .OrderByDescending(y => y.AverageTpKills).Take(5))
+        {
+            player.Awards.Add(new PowerRankedAward($"#{index + 1} Clutch TP Kill avg",
+                (DotaEnums.AwardColor)(index < 3 ? index : 3)));
+            index++;
+        }
+
+        index = 0;
+        foreach (var player in players
+                     .OrderByDescending(y => y.AverageSoloKills).Take(5))
+        {
+            player.Awards.Add(new PowerRankedAward($"#{index + 1} Solo Kill avg",
+                (DotaEnums.AwardColor)(index < 3 ? index : 3)));
+            index++;
+        }
+
 
         index = 0;
         foreach (var player in players
@@ -308,9 +362,6 @@ public class DotaAwardsService : IDotaAwardsService
                     Math.Max(y.SafelaneScore + y.OfflaneScore, y.MidlaneScore + y.OfflaneScore))))
             .First().Awards.Add(new PowerRankedAward("Best Core Duo", DotaEnums.AwardColor.Green));
 
-        division.Teams.OrderByDescending(x => x.Players.Sum(y => y.JungleScore)).First().Awards
-            .Add(new PowerRankedAward("Best Jungling Team", DotaEnums.AwardColor.Green));
-
         division.Teams
             .OrderByDescending(x => x.Players.Sum(y => y.Heroes.Where(z => z.MatchesPlayed > 5).ToList().Count)).First()
             .Awards
@@ -321,6 +372,30 @@ public class DotaAwardsService : IDotaAwardsService
             .First()
             .Awards
             .Add(new PowerRankedAward("RD2L Vets", DotaEnums.AwardColor.Blue));
+
+        division.Teams.OrderBy(x => x.Players.Sum(y => y.AveragePauses)).First().Awards
+            .Add(new PowerRankedAward("Bathroom Gamers", DotaEnums.AwardColor.Blue));
+
+        division.Teams.OrderBy(x => x.Players.Sum(y => y.AverageRandomHeroes)).First().Awards
+            .Add(new PowerRankedAward("Random Hero Gamers", DotaEnums.AwardColor.Blue));
+
+        division.Teams.OrderBy(x => x.Players.Sum(y => y.AverageScans)).First().Awards
+            .Add(new PowerRankedAward("Scanning Enthusiasts", DotaEnums.AwardColor.Green));
+
+        division.Teams.OrderBy(x => x.Players.Sum(y => y.AverageInvisibleKills + y.AverageSoloKills)).First().Awards
+            .Add(new PowerRankedAward("Stealth Assassins", DotaEnums.AwardColor.Green));
+
+        division.Teams.OrderBy(x => x.Players.Sum(y => y.AverageTpKills)).First().Awards
+            .Add(new PowerRankedAward("Clutch Killers", DotaEnums.AwardColor.Green));
+
+        division.Teams.OrderBy(x => x.Players.Sum(y => y.AverageTpKills)).First().Awards
+            .Add(new PowerRankedAward("Run Down Mid Gamers", DotaEnums.AwardColor.Red));
+
+        division.Teams.OrderBy(x => x.Players.Sum(y => y.AverageGankKills)).First().Awards
+            .Add(new PowerRankedAward("Roaming Enthusiasts", DotaEnums.AwardColor.Green));
+
+        division.Teams.OrderBy(x => x.Players.Sum(y => y.AverageSmokeKills)).First().Awards
+            .Add(new PowerRankedAward("Smoke Specialists", DotaEnums.AwardColor.Green));
 
         division.Teams
             .OrderBy(x => x.Players.Sum(y => y.Heroes.Sum(z => z.MatchesPlayed * z.LeagueMatchMakingPercent))).First()
@@ -346,11 +421,6 @@ public class DotaAwardsService : IDotaAwardsService
             .OrderByDescending(x => x.Players.Sum(y => y.FirstBloodAverage)).First()
             .Awards
             .Add(new PowerRankedAward("First Blood Gamers", DotaEnums.AwardColor.Green));
-
-        division.Teams
-            .OrderByDescending(x => x.Players.Sum(y => y.RoamingScore)).First()
-            .Awards
-            .Add(new PowerRankedAward("Roaming Aficionados", DotaEnums.AwardColor.Blue));
 
         division.Teams
             .OrderByDescending(x => x.Players.Sum(y => y.CampsStackedAverage)).First()

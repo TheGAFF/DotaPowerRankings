@@ -22,10 +22,11 @@ public class DotaRankingService : IDotaRankingService
     private readonly IPlayerDataSource _playerDataSource;
     private readonly IPostSeasonAwardService _postSeasonAwardService;
     private readonly IDotaAwardsService _dotaAwardsService;
+    private readonly IOpenAIService _openAiService;
 
     public DotaRankingService(ILogger<DotaRankingService> logger, DotaDbContext context, IMapper mapper,
         IPlayerDataSource playerDataSource, IPostSeasonAwardService postSeasonAwardService,
-        IDotaAwardsService dotaAwardsService)
+        IDotaAwardsService dotaAwardsService, IOpenAIService openAiService)
     {
         _logger = logger;
         _context = context;
@@ -33,10 +34,11 @@ public class DotaRankingService : IDotaRankingService
         _playerDataSource = playerDataSource;
         _postSeasonAwardService = postSeasonAwardService;
         _dotaAwardsService = dotaAwardsService;
+        _openAiService = openAiService;
     }
 
 
-    public PowerRankedLeague GeneratePreSeasonLeaguePowerRankings(PlayerDataSourceLeague league)
+    public async Task<PowerRankedLeague> GeneratePreSeasonLeaguePowerRankings(PlayerDataSourceLeague league)
     {
         var powerRankedLeague = new PowerRankedLeague { Name = league.Name, LeagueId = league.LeagueId };
 
@@ -52,6 +54,8 @@ public class DotaRankingService : IDotaRankingService
 
             powerRankedDivision.Players = RankPlayers(powerRankedDivision.Players, powerRankedDivision);
 
+            powerRankedDivision.Players = await _openAiService.GeneratePlayerReviews(powerRankedDivision.Players);
+
             powerRankedLeague.Divisions.Add(powerRankedDivision);
         }
 
@@ -60,7 +64,7 @@ public class DotaRankingService : IDotaRankingService
     }
 
 
-    public PowerRankedLeague GeneratePostSeasonLeaguePowerRankings(PlayerDataSourceLeague league)
+    public async Task<PowerRankedLeague> GeneratePostSeasonLeaguePowerRankings(PlayerDataSourceLeague league)
     {
         var powerRankedLeague = new PowerRankedLeague { Name = league.Name, LeagueId = league.LeagueId };
 
@@ -102,6 +106,15 @@ public class DotaRankingService : IDotaRankingService
 
         powerRankedLeague = _postSeasonAwardService.GeneratePostSeasonAwards(powerRankedLeague);
 
+        foreach (var division in powerRankedLeague.Divisions)
+        {
+            foreach (var team in division.Teams)
+            {
+                team.Players = await _openAiService.GeneratePlayerReviews(team.Players);
+            }
+        }
+
+
         return powerRankedLeague;
     }
 
@@ -126,7 +139,7 @@ public class DotaRankingService : IDotaRankingService
             .Where(x => playerIds.Any(y => y == x.PlayerId)).ToList();
         var playerAbilities = _context.PlayerMatchAbilities.AsNoTracking()
             .Where(x => playerIds.Any(y => y == x.PlayerId)).ToList();
-        Parallel.ForEach(playerIds, new ParallelOptions { MaxDegreeOfParallelism = 6 },
+        Parallel.ForEach(playerIds, new ParallelOptions { MaxDegreeOfParallelism = 4 },
             playerId =>
             {
                 var player = players.FirstOrDefault(x => x.PlayerId == playerId);
@@ -219,20 +232,23 @@ public class DotaRankingService : IDotaRankingService
         powerRankedPlayer.AverageTowerDamage = (decimal)playerMatches.Average(x => x.TowerDamage);
 
         powerRankedPlayer.AverageLaneEfficiency =
-            (decimal)playerMatches.Where(x => x.LaneEfficiencyPct > 40).Average(x => x.LaneEfficiencyPct);
+            (decimal)playerMatches.Where(x => x.LaneEfficiencyPct > 40).Average(x => x.LaneEfficiencyPct) / 4000M;
 
         powerRankedPlayer.AverageLaneEfficiencyMid =
-            (decimal)playerMatches.Where(x => x.LaneEfficiencyPct > 40 && x.Lane == DotaEnums.Lane.Mid).DefaultIfEmpty()
-                .Average(x => x?.LaneEfficiencyPct ?? 0);
+            (decimal)playerMatches.Where(x => x.LaneRole == DotaEnums.TeamRole.Midlane && x.Lane == DotaEnums.Lane.Mid)
+                .DefaultIfEmpty()
+                .Average(x => x?.LaneEfficiencyPct ?? 0) / 4000M;
 
         powerRankedPlayer.AverageLaneEfficiencyOff =
-            (decimal)playerMatches.Where(x => x.LaneEfficiencyPct > 40 && x.Lane == DotaEnums.Lane.Off).DefaultIfEmpty()
-                .Average(x => x?.LaneEfficiencyPct ?? 0);
+            (decimal)playerMatches.Where(x => x.LaneRole == DotaEnums.TeamRole.Offlane && x.Lane == DotaEnums.Lane.Off)
+                .DefaultIfEmpty()
+                .Average(x => x?.LaneEfficiencyPct ?? 0) / 4000M;
 
         powerRankedPlayer.AverageLaneEfficiencySafe =
-            (decimal)playerMatches.Where(x => x.LaneEfficiencyPct > 40 && x.Lane == DotaEnums.Lane.Safe)
+            (decimal)playerMatches
+                .Where(x => x.LaneRole == DotaEnums.TeamRole.Safelane && x.Lane == DotaEnums.Lane.Safe)
                 .DefaultIfEmpty()
-                .Average(x => x?.LaneEfficiencyPct ?? 0);
+                .Average(x => x?.LaneEfficiencyPct ?? 0) / 4000M;
 
         powerRankedPlayer.AverageSentriesPlaced =
             (decimal)playerMatches.Where(x => x.LaneEfficiencyPct < 40).Select(x => x.SenPlaced).DefaultIfEmpty(0)
@@ -242,6 +258,34 @@ public class DotaRankingService : IDotaRankingService
             (decimal)playerMatches.Average(x =>
                 x.Match.PlayerMatchItemUses.Where(y => y.ItemId == (int)DotaEnums.Item.Armlet).Sum(y => y.Uses));
 
+
+        powerRankedPlayer.AverageGankKills = playerMatches.Average(x => x.GankKillCount * 1M);
+
+        powerRankedPlayer.AverageSmokeKills = playerMatches.Average(x => x.SmokeKillCount * 1M);
+
+        powerRankedPlayer.AverageSoloKills = playerMatches.Average(x => x.SoloKillCount * 1M);
+
+        powerRankedPlayer.AverageTpKills = playerMatches.Average(x => x.TpRecentlyKillCount * 1M);
+
+        powerRankedPlayer.AverageInvisibleKills = playerMatches.Average(x => x.InvisibleKillCount * 1M);
+
+        powerRankedPlayer.AverageScans = playerMatches.Average(x => (x.Scans ?? 0) * 1M);
+
+        powerRankedPlayer.AverageIntentionalFeeding =
+            playerMatches.Count(x => x.IntentionalFeeding) * 1M / playerMatches.Count * 1M;
+
+        powerRankedPlayer.AverageMVPs =
+            playerMatches.Count(x => x.Award == "MVP") * 1M / playerMatches.Count * 1M;
+
+        powerRankedPlayer.AverageBestCore =
+            playerMatches.Count(x => x.Award == "TOP_CORE") * 1M / playerMatches.Count * 1M;
+
+        powerRankedPlayer.AverageBestSupport =
+            playerMatches.Count(x => x.Award == "TOP_SUPPORT") * 1M / playerMatches.Count * 1M;
+
+        powerRankedPlayer.AveragePauses = playerMatches.Average(x => x.PauseCount * 1M);
+
+        powerRankedPlayer.AverageRandomHeroes = playerMatches.Count(x => x.Randomed) * 1M / playerMatches.Count * 1M;
 
         powerRankedPlayer =
             _postSeasonAwardService.CalculatePostSeasonPlayerScore(powerRankedPlayer, league, playerMatches);
@@ -278,7 +322,7 @@ public class DotaRankingService : IDotaRankingService
                 heroMatches.Count() * 1M;
 
             hero.SoftSupportPercent = (decimal)heroMatches.Count(x =>
-                    x.LaneRole == DotaEnums.TeamRole.SoftSupport) /
+                    x.LaneRole == DotaEnums.TeamRole.SoftSupport && x.Lane == DotaEnums.Lane.Off) /
                 heroMatches.Count() * 1M;
 
             hero.HardSupportPercent =
@@ -319,6 +363,8 @@ public class DotaRankingService : IDotaRankingService
             hero.LeagueMatchMakingPercent =
                 (decimal)heroMatches.Count(x => x.LobbyType == DotaEnums.LobbyType.Practice) /
                 heroMatches.Count() * 1M;
+
+            hero.Impact = heroMatches.Average(x => x.Imp * 1M);
 
             hero = GetHeroScores(hero);
 
@@ -369,7 +415,13 @@ public class DotaRankingService : IDotaRankingService
 
         var kdaWeight = Math.Max(hero.KDA, DotaRankingConstants.MaxKDAWeighted) * DotaRankingConstants.KDAFactor;
 
-        hero.Score = (badgeWeight + winRateGamesPlayedWeight + kdaWeight) * lobbyAdjustment;
+        var impactWeight = hero.Impact * DotaRankingConstants.ImpactFactor;
+
+        hero.Score = (winRateGamesPlayedWeight + kdaWeight + impactWeight) * lobbyAdjustment;
+
+        hero.MinimumScore = badgeWeight * lobbyAdjustment;
+
+        hero.TotalScore = hero.Score + hero.MinimumScore;
 
         hero.ScoreSafelane = hero.Score * hero.SafelanePercent;
 
@@ -391,7 +443,7 @@ public class DotaRankingService : IDotaRankingService
     private static PowerRankedPlayer GetPlayerScore(PowerRankedPlayer player)
     {
         // Can't calculate player score if there aren't any heroes with scores
-        if (!player.Heroes.Any(x => x.Score > 0))
+        if (!player.Heroes.Any(x => x.TotalScore > 0))
         {
             return player;
         }
@@ -438,7 +490,9 @@ public class DotaRankingService : IDotaRankingService
             player.JungleScore = Math.Round(jungleHeroes.Average(x => x.ScoreJungle));
         }
 
-        player.OverallScore = player.SafelaneScore + player.MidlaneScore + player.OfflaneScore +
+        var minimumScore = player.Heroes.Average(x => x.MinimumScore * 5M);
+
+        player.OverallScore = minimumScore + player.SafelaneScore + player.MidlaneScore + player.OfflaneScore +
                               player.SoftSupportScore + player.HardSupportScore;
 
         // Calculate toxicity score

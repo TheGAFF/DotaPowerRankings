@@ -4,5 +4,5 @@ namespace RD2LPowerRankings.Services.DotaRanking;
 
 public interface IOpenAIService
 {
-    public PowerRankedLeague GeneratePlayerReviews(PowerRankedLeague league);
+    public Task<List<PowerRankedPlayer>> GeneratePlayerReviews(List<PowerRankedPlayer> players);
 }

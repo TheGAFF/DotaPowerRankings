@@ -37,7 +37,9 @@ public static class DotaRankingKeyValuePairs
         new KeyValuePair<int, string>(14107, "Phase Dota Circuit Season 2"),
         new KeyValuePair<int, string>(13807, "League of Lads Season 9"),
         new KeyValuePair<int, string>(13450, "League of Lads Season 8"),
-        new KeyValuePair<int, string>(13177, "League of Lads Season 7")
+        new KeyValuePair<int, string>(13177, "League of Lads Season 7"),
+
+        new KeyValuePair<int, string>(14725, "Midwest Dota2 League Season 12")
     };
 
     public static readonly List<KeyValuePair<DotaEnums.Badge, decimal>> BadgeWeights =

@@ -41,7 +41,7 @@ public class DotaController : ControllerBase
     {
         _logger.LogInformation($"{nameof(LoadPlayerData)} Started");
 
-        // await _dotaDataSource.LoadPlayerData(sheetId);
+        await _dotaDataSource.LoadPlayerData(sheetId);
 
         await _dotaExtendedDataSource.LoadExtendedPlayerData(sheetId);
 
@@ -56,7 +56,7 @@ public class DotaController : ControllerBase
     /// <returns></returns>
     [HttpPost("[action]")]
     [ActionName("Post-Season-Rankings")]
-    public bool GetPowerRankings(PlayerDataSourceLeague league)
+    public async Task<bool> GetPowerRankings(PlayerDataSourceLeague league)
     {
         _logger.LogInformation($"{nameof(GetPowerRankings)} Started");
 
@@ -64,7 +64,7 @@ public class DotaController : ControllerBase
         {
             var serializer = JsonSerializer.Create(new JsonSerializerSettings
                 { ContractResolver = new CamelCasePropertyNamesContractResolver() });
-            serializer.Serialize(file, _dotaRankingService.GeneratePostSeasonLeaguePowerRankings(league));
+            serializer.Serialize(file, await _dotaRankingService.GeneratePostSeasonLeaguePowerRankings(league));
         }
 
         _logger.LogInformation($"{nameof(GetPowerRankings)} Finished");
@@ -79,7 +79,7 @@ public class DotaController : ControllerBase
     /// <returns></returns>
     [HttpPost("[action]")]
     [ActionName("Pre-Season-Rankings")]
-    public bool GetStartingPowerRankings(PlayerDataSourceLeague league)
+    public async Task<bool> GetStartingPowerRankings(PlayerDataSourceLeague league)
     {
         _logger.LogInformation($"{nameof(GetPowerRankings)} Started");
 
@@ -87,7 +87,7 @@ public class DotaController : ControllerBase
         {
             var serializer = JsonSerializer.Create(new JsonSerializerSettings
                 { ContractResolver = new CamelCasePropertyNamesContractResolver() });
-            serializer.Serialize(file, _dotaRankingService.GeneratePreSeasonLeaguePowerRankings(league));
+            serializer.Serialize(file, await _dotaRankingService.GeneratePreSeasonLeaguePowerRankings(league));
         }
 
         _logger.LogInformation($"{nameof(GetPowerRankings)} Finished");

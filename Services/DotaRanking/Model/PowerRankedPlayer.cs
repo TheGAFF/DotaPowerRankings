@@ -156,9 +156,30 @@ public class PowerRankedPlayer
 
     [JsonIgnore] public decimal AverageRapierPurchases { get; set; }
 
+    [JsonIgnore] public decimal AverageGankKills { get; set; }
+
+    [JsonIgnore] public decimal AverageSmokeKills { get; set; }
+
+    [JsonIgnore] public decimal AverageSoloKills { get; set; }
+
+    [JsonIgnore] public decimal AverageIntentionalFeeding { get; set; }
+
+    [JsonIgnore] public decimal AverageTpKills { get; set; }
+
+    [JsonIgnore] public decimal AverageMVPs { get; set; }
+
+    [JsonIgnore] public decimal AverageBestSupport { get; set; }
+
+    [JsonIgnore] public decimal AverageBestCore { get; set; }
+
+    [JsonIgnore] public decimal AveragePauses { get; set; }
+
+    [JsonIgnore] public decimal AverageRandomHeroes { get; set; }
+
+    [JsonIgnore] public decimal AverageScans { get; set; }
+
+    [JsonIgnore] public decimal AverageInvisibleKills { get; set; }
 
     [JsonIgnore] public PostSeasonPlayerScore PostSeasonPlayerScore { get; set; } = new();
-
-    [JsonIgnore] public PlayerReviewScore PlayerReviewScore { get; set; } = new();
     public PlayerReview PlayerReview { get; set; } = new();
 }
