@@ -324,9 +324,15 @@ public class StratzDotaDataSource : IDotaDataSource
                                   (playerMatch.Deaths == 0 ? 1M : playerMatch.Deaths * 1M);
                 playerMatch.Abandons = player["leaverStatus"]?.Value<string?>() == "NONE" ? 0 : 1;
                 playerMatch.CourierKills = player["stats"]?["courierKills"]?.Count() ?? 0;
-                playerMatch.LaneEfficiencyPct =
-                    (int)(player["stats"]?["networthPerMinute"]?[10]?.Value<int?>() ?? 1M * 1M / 4000 * 100M);
+
+                if (player["stats"]?["networthPerMinute"]?.Count() >= 10)
+                {
+                    playerMatch.LaneEfficiencyPct =
+                        (int)(player["stats"]?["networthPerMinute"]?[10]?.Value<int?>() ?? 1M * 1M / 4000 * 100M);
+                }
+
                 playerMatch.Lane = DotaDataHelpers.LaneStringToEnum(player["lane"]?.Value<string>()!);
+
                 playerMatch.LaneRole =
                     DotaDataHelpers.RoleStringToEnum(player["role"].Value<string>(), playerMatch.Lane);
                 var totalActions = 0;
