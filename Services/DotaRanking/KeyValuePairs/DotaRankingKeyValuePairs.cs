@@ -6,39 +6,48 @@ public static class DotaRankingKeyValuePairs
 {
     public static List<KeyValuePair<int, string>> ValidLeagues = new()
     {
+        new KeyValuePair<int, string>(4122, "FACEIT League"),
+
         new KeyValuePair<int, string>(9872, "RD2L Mini Season 4"),
         new KeyValuePair<int, string>(10139, "RD2L Mini Season 5"),
         new KeyValuePair<int, string>(10457, "RD2L Mini Season 6"),
-        new KeyValuePair<int, string>(9656, "RD2L Season 13"),
-        new KeyValuePair<int, string>(9970, "RD2L Season 14"),
-        new KeyValuePair<int, string>(10268, "RD2L Season 15"),
-        new KeyValuePair<int, string>(10562, "RD2L Season 16"),
-        new KeyValuePair<int, string>(10973, "RD2L Season 17"),
-        new KeyValuePair<int, string>(11278, "RD2L Season 18"),
-        new KeyValuePair<int, string>(11608, "RD2L Season 19"),
-        new KeyValuePair<int, string>(11984, "RD2L Season 20"),
-        new KeyValuePair<int, string>(12384, "RD2L Season 21"),
-        new KeyValuePair<int, string>(12762, "RD2L Season 22"),
-        new KeyValuePair<int, string>(13185, "RD2L Season 23"),
         new KeyValuePair<int, string>(13375, "RD2L Season 24"),
         new KeyValuePair<int, string>(13780, "RD2L Season 25"),
         new KeyValuePair<int, string>(14137, "RD2L Season 26"),
         new KeyValuePair<int, string>(14507, "RD2L Season 27"),
+        new KeyValuePair<int, string>(14906, "RD2L Season 28"),
+
 
         new KeyValuePair<int, string>(5629, "RD2L Mini"),
         new KeyValuePair<int, string>(9858, "RD2L Weekend Cup"),
         new KeyValuePair<int, string>(12593, "RD2L Masters Season 1"),
         new KeyValuePair<int, string>(12950, "RD2L Masters Season 2"),
         new KeyValuePair<int, string>(13361, "RD2L Masters Season 3"),
+        
         new KeyValuePair<int, string>(12939, "FHDL Season 1"),
         new KeyValuePair<int, string>(13679, "FHDL Season 3"),
         new KeyValuePair<int, string>(14078, "FHDL Season 4"),
+        
         new KeyValuePair<int, string>(13941, "Phase Dota Circuit Season 1"),
         new KeyValuePair<int, string>(14107, "Phase Dota Circuit Season 2"),
+        new KeyValuePair<int, string>(14416, "Phase DotA Circuit Archon - Season 1"),
+        
+        new KeyValuePair<int, string>(13812, "AD2L Season 34"),
+        new KeyValuePair<int, string>(14160, "AD2L Season 35"),
+        new KeyValuePair<int, string>(14558, "AD2L Season 36"),
+
+
+        new KeyValuePair<int, string>(14648, "League of Lads Season 11"),
+        new KeyValuePair<int, string>(14211, "League of Lads Season 10"),
         new KeyValuePair<int, string>(13807, "League of Lads Season 9"),
         new KeyValuePair<int, string>(13450, "League of Lads Season 8"),
         new KeyValuePair<int, string>(13177, "League of Lads Season 7"),
 
+        new KeyValuePair<int, string>(12974, "LD2L Scrims"),
+        new KeyValuePair<int, string>(14120, "LD2L Season 13"),
+
+        new KeyValuePair<int, string>(13626, "Midwest Dota2 League Season 10"),
+        new KeyValuePair<int, string>(14152, "Midwest Dota2 League Season 11"),
         new KeyValuePair<int, string>(14725, "Midwest Dota2 League Season 12")
     };
 
