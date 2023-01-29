@@ -1,11 +1,12 @@
-﻿using RD2LPowerRankings.Services.DotaRanking.Enums;
+﻿using RD2LPowerRankings.Helpers;
+using RD2LPowerRankings.Services.DotaRanking.Enums;
 
 namespace RD2LPowerRankings.Services.DotaRanking;
 
 public class OpenAIPlayerSentenceBuilders
 {
     public static List<string> ReviewPrefixWords = new()
-        { "funny", "snarky", "serious", "thought-provoking", "witty", "exciting" };
+        { "funny", "snarky", "serious", "thought-provoking", "witty", "exciting", "brutally honest", "hilarious" };
 
     public static List<string> RankWords = new() { "rank", "bracket", "tier", "level" };
 
@@ -16,19 +17,71 @@ public class OpenAIPlayerSentenceBuilders
     public static List<string> WholesomeWords = new()
         { "wholesome player", "friendly player", "nice dude" };
 
-    public static List<string> WordUsage = new() { "one", "two" };
+    public static List<string> PlayerWordUsage = new() { "one", "two" };
 
-    public static List<string> SuffixToxicBadWords = new() { "motherfucker", "shit", "hell", "damn", "fuck" };
+    public static List<string> TeamWordUsage = new() { "three", "four", "five" };
 
-    public static List<string> SuffixWholesomeWords = new() { "badass", "real one", "chad", "hell yeah" };
+    public static List<string> SuffixToxicBadWords = new() { "mother fucker", "shit", "hell", "damn", "fuck" };
+
+    public static List<string> SuffixWholesomeWords = new() { "badass", "real one", "chad", "based" };
 
     public static List<string> GoodHeroWords = new()
     {
         "amazing at", "solid at", "skilled at", "exceptional at", "amazing with", "skillful with", "plays a good"
     };
 
+    public static List<string> TeamCaptainWords = new()
+    {
+        "team captain", "team leader", "captain of team", "team owner", "the captain"
+    };
 
-    public static List<string> GenerateRankWords(int rank)
+    public static List<string> GenerateTeamRankWords(int rank, IEnumerable<int?> teamRanks)
+    {
+        var badgeName = string.Concat(Enum.GetName(typeof(DotaEnums.Badge), rank).Where(char.IsLetter));
+
+        if ((badgeName == "Immortal" || badgeName == "Divine") && teamRanks.Count(x => x >= rank) == 1)
+        {
+            return new List<string>
+            {
+                "best player on team", "most skillful on team", "the GOAT of the team", "the heavy lifter", "team MVP",
+                "top performer"
+            };
+        }
+
+        if (badgeName == "Immortal")
+        {
+            return GeneratePlayerRankWords(rank);
+        }
+
+        if (badgeName == "Divine")
+        {
+            return GeneratePlayerRankWords(rank);
+        }
+
+        if (badgeName == "Ancient")
+        {
+            return GeneratePlayerRankWords(rank);
+        }
+
+        if (badgeName == "Legend")
+        {
+            return GeneratePlayerRankWords(rank);
+        }
+
+        if (badgeName == "Archon")
+        {
+            return GeneratePlayerRankWords(rank);
+        }
+
+        if (badgeName == "Crusader")
+        {
+            return GeneratePlayerRankWords(rank);
+        }
+
+        return GeneratePlayerRankWords(rank);
+    }
+
+    public static List<string> GeneratePlayerRankWords(int rank)
     {
         var badgeName = string.Concat(Enum.GetName(typeof(DotaEnums.Badge), rank).Where(char.IsLetter));
 
@@ -36,7 +89,7 @@ public class OpenAIPlayerSentenceBuilders
         {
             return new List<string>
             {
-                "top ranked", "Immortal Rank", "amazing game sense", "borderline pro player", "great map awareness",
+                "top ranked", "immortal rank", "amazing game sense", "borderline pro player", "great map awareness",
                 "makes almost no mistakes"
             };
         }
@@ -44,23 +97,25 @@ public class OpenAIPlayerSentenceBuilders
         if (badgeName == "Divine")
         {
             return new List<string>
-                { "Divine Rank", "Divine Tier", "good game sense", "solid mechanical skills", "solid map awareness" };
+            {
+                "divine rank", "divine tier", "good game sense", "solid mechanical skills", "solid map awareness",
+                "very good player"
+            };
         }
-
 
         if (badgeName == "Ancient")
         {
-            return new List<string> { "Ancient Tier", "Ancient Rank" };
+            return new List<string> { "ancient tier", "ancient rank", "decent skill", "good player" };
         }
 
         if (badgeName == "Legend")
         {
-            return new List<string> { "Legend Tier", "Legend Rank" };
+            return new List<string> { "average player", "middle of the pack" };
         }
 
         if (badgeName == "Archon")
         {
-            return new List<string> { "mediocre rank", "makes mistakes" };
+            return new List<string> { "mediocre rank", "makes mistakes", "needs to improve", "newb" };
         }
 
         if (badgeName == "Crusader")
@@ -70,7 +125,7 @@ public class OpenAIPlayerSentenceBuilders
         }
 
 
-        return new List<string> { "bad game sense", "makes many mistakes", "basically herald rank" };
+        return new List<string> { "bad game sense", "makes many mistakes", "terrible player" };
     }
 
     public static List<string> GetHeroDescriptionWords(DotaEnums.Hero hero)
@@ -162,7 +217,7 @@ public class OpenAIPlayerSentenceBuilders
 
         if (hero == DotaEnums.Hero.Sven)
         {
-            return new List<string> { "recovers fast in jungle", "prays for 5 man cleaves" };
+            return new List<string> { "fast jungler", "prays for 5 man cleaves" };
         }
 
         if (hero == DotaEnums.Hero.Tiny)
@@ -307,7 +362,7 @@ public class OpenAIPlayerSentenceBuilders
 
         if (hero == DotaEnums.Hero.Luna)
         {
-            return new List<string> { "recovers fast in jungle", "good ult usage" };
+            return new List<string> { "lucent beams your ass", "good ult usage" };
         }
 
         if (hero == DotaEnums.Hero.Dragon_Knight)
@@ -727,12 +782,63 @@ public class OpenAIPlayerSentenceBuilders
 
     public static List<string> UnknownPlayerWords = new()
     {
-        "mysterious player", "dark horse", "unknown"
+        "mysterious player", "dark horse", "unknown", "enigmatic player", "new player"
     };
 
     public static List<string> UnknownPlayerEndingSentences = new()
     {
         "Make up a funny dota2 fact about this player.",
-        "Make up a dota2 joke about this player."
+        "Make up a dota2 joke about this player.",
+        "Use big words."
+    };
+
+    public static List<string> GetTeamRankWords(int rank, decimal percentileRank)
+    {
+        if (rank == 1)
+        {
+            return new List<string> { "best team in league", "#1 rank team" };
+        }
+
+        if (rank == 2)
+        {
+            return new List<string> { "2nd best team", "#2 rank team" };
+        }
+
+        if (percentileRank <= 0.2M)
+        {
+            return new List<string> { "incredible team", "top tier team", "unstoppable team" };
+        }
+
+        if (percentileRank <= 0.3M)
+        {
+            return new List<string> { "good team", "solid team", "high ranked team" };
+        }
+
+        if (percentileRank <= 0.4M)
+        {
+            return new List<string> { "decent team", "respectable team", "commendable team" };
+        }
+
+        if (percentileRank <= 0.6M)
+        {
+            return new List<string> { "okay team", "stuck near the middle", "acceptable team" };
+        }
+
+        if (percentileRank <= 0.8M)
+        {
+            return new List<string> { "could be better", "mediocre team", "needs to improve" };
+        }
+
+        return new List<string>
+            { "bottom of the barrel team", "bad skilled team", "one of the worst teams", "low rank team" };
+    }
+
+    public static List<string> TeamEndingSentences = new()
+    {
+        "Use sophisticated words.",
+        $"Use the word {SuffixToxicBadWords.PickRandom()} {TeamWordUsage.PickRandom()} times.",
+        $"Use the word {SuffixWholesomeWords.PickRandom()} {TeamWordUsage.PickRandom()} times.",
+        "Talk about their team name.",
+        "Say a vulgar word in every sentence."
     };
 }

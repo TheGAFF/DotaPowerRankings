@@ -20,5 +20,7 @@ public class PowerRankedTeam
 
     public string Name { get; set; } = null!;
 
+    public TeamReview TeamReview { get; set; } = new();
+
     public List<PowerRankedAward> Awards { get; set; } = new();
 }

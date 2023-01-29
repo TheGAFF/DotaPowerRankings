@@ -16,6 +16,8 @@ public class PowerRankedPlayer
 
     public string? Avatar { get; set; }
 
+    [JsonIgnore] public int? SmurfFlag { get; set; }
+
     public string? Loccountrycode { get; set; }
     public int? MmrEstimate { get; set; }
 
@@ -169,9 +171,17 @@ public class PowerRankedPlayer
     [JsonIgnore] public decimal AverageMVPs { get; set; }
 
     [JsonIgnore] public decimal AverageBestSupport { get; set; }
-
     [JsonIgnore] public decimal AverageBestCore { get; set; }
 
+    [JsonIgnore] public decimal AverageBestPos1 { get; set; }
+
+    [JsonIgnore] public decimal AverageBestPos2 { get; set; }
+
+    [JsonIgnore] public decimal AverageBestPos3 { get; set; }
+
+    [JsonIgnore] public decimal AverageBestPos4 { get; set; }
+
+    [JsonIgnore] public decimal AverageBestPos5 { get; set; }
     [JsonIgnore] public decimal AveragePauses { get; set; }
 
     [JsonIgnore] public decimal AverageRandomHeroes { get; set; }

@@ -14,12 +14,14 @@ public static class DotaRankingConstants
 
     public const decimal WinRateGamesPlayedFactor = 10M;
     public const decimal LobbyTypeFactor = 1M;
-    public const decimal KDAFactor = 4M;
+    public const decimal KDAFactor = 2M;
     public const decimal ToxicityAbandonFactor = 10000M;
     public const decimal ToxicityPingFactor = 25M;
     public const decimal ToxicityPingAbandonFactor = 1500M;
     public const decimal ToxicityWordFactor = 7M;
+    public const decimal ToxicityIntentionalFeedingFactor = 250000M;
     public const decimal ImpactFactor = 10M;
+
 
     public const int PowerRankRespectBansThreshold = 5;
     public const int PowerRankGamesPlayedThreshold = 1;

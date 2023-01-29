@@ -112,6 +112,10 @@ public class DotaRankingService : IDotaRankingService
             {
                 team.Players = await _openAiService.GeneratePlayerReviews(team.Players);
             }
+
+            division.Teams =
+                await _openAiService.GenerateTeamReviews(division.Teams,
+                    $"{division.Name}-{league.Name}-{league.FileName}");
         }
 
 
@@ -216,14 +220,15 @@ public class DotaRankingService : IDotaRankingService
             playerMatches.Count * 1M;
 
         powerRankedPlayer.AverageAbandons =
-            (decimal)playerMatches.Sum(x => x.Abandons) / playerMatches.Count;
+            playerMatches.Count(x => x.LeaverStatus == "ABANDONED") * 1M / playerMatches.Count * 1M;
 
         powerRankedPlayer.AverageExcessPings = (decimal)playerMatches
             .Where(x => x.Pings > DotaRankingConstants.ExcessivePingThreshold)
             .Sum(x => x.Pings) / playerMatches.Count;
 
         powerRankedPlayer.AverageExcessPingAbandons =
-            (decimal)playerMatches.Where(x => x.Pings > DotaRankingConstants.ExcessivePingThreshold && x.Abandons == 1)
+            (decimal)playerMatches.Where(x => x.Pings > DotaRankingConstants.ExcessivePingThreshold && x.LeaverStatus ==
+                    "ABANDONED")
                 .Sum(x => x.Pings) / playerMatches.Count;
 
         powerRankedPlayer.AverageTeamFightParticipation = playerMatches.Average(x => x.TeamfightParticipation);
@@ -278,10 +283,36 @@ public class DotaRankingService : IDotaRankingService
             playerMatches.Count(x => x.Award == "MVP") * 1M / playerMatches.Count * 1M;
 
         powerRankedPlayer.AverageBestCore =
-            playerMatches.Count(x => x.Award == "TOP_CORE") * 1M / playerMatches.Count * 1M;
+            playerMatches.Count(x => x.Award == "TOP_CORE" && (x.LaneRole == DotaEnums.TeamRole.Safelane ||
+                                                               x.LaneRole == DotaEnums.TeamRole.Offlane ||
+                                                               x.LaneRole == DotaEnums.TeamRole.Midlane)) * 1M /
+            playerMatches.Count * 1M;
+
+        powerRankedPlayer.AverageBestPos1 =
+            playerMatches.Count(x => x.Award == "TOP_CORE" && x.LaneRole == DotaEnums.TeamRole.Safelane) * 1M /
+            playerMatches.Count * 1M;
+
+        powerRankedPlayer.AverageBestPos2 =
+            playerMatches.Count(x => x.Award == "TOP_CORE" && x.LaneRole == DotaEnums.TeamRole.Midlane) * 1M /
+            playerMatches.Count * 1M;
+
+        powerRankedPlayer.AverageBestPos3 =
+            playerMatches.Count(x => x.Award == "TOP_CORE" && x.LaneRole == DotaEnums.TeamRole.Offlane) * 1M /
+            playerMatches.Count * 1M;
 
         powerRankedPlayer.AverageBestSupport =
-            playerMatches.Count(x => x.Award == "TOP_SUPPORT") * 1M / playerMatches.Count * 1M;
+            playerMatches.Count(x => x.Award == "TOP_SUPPORT" && (x.LaneRole == DotaEnums.TeamRole.HardSupport ||
+                                                                  x.LaneRole == DotaEnums.TeamRole.SoftSupport)) * 1M /
+            playerMatches.Count * 1M;
+
+        powerRankedPlayer.AverageBestPos4 =
+            playerMatches.Count(x => x.Award == "TOP_SUPPORT" && x.LaneRole == DotaEnums.TeamRole.SoftSupport) * 1M /
+            playerMatches.Count * 1M;
+
+        powerRankedPlayer.AverageBestPos5 =
+            playerMatches.Count(x => x.Award == "TOP_SUPPORT" && x.LaneRole == DotaEnums.TeamRole.HardSupport) * 1M /
+            playerMatches.Count * 1M;
+
 
         powerRankedPlayer.AveragePauses = playerMatches.Average(x => x.PauseCount * 1M);
 
@@ -417,7 +448,7 @@ public class DotaRankingService : IDotaRankingService
 
         var impactWeight = hero.Impact * DotaRankingConstants.ImpactFactor;
 
-        hero.Score = (winRateGamesPlayedWeight + kdaWeight + impactWeight) * lobbyAdjustment;
+        hero.Score = (kdaWeight + impactWeight) * lobbyAdjustment;
 
         hero.MinimumScore = badgeWeight * lobbyAdjustment;
 
@@ -499,7 +530,8 @@ public class DotaRankingService : IDotaRankingService
         player.ToxicityScore = player.AverageAbandons * DotaRankingConstants.ToxicityAbandonFactor +
                                player.AverageExcessPings * DotaRankingConstants.ToxicityPingFactor +
                                player.AverageExcessPingAbandons * DotaRankingConstants.ToxicityPingAbandonFactor +
-                               player.AverageWordToxicity * DotaRankingConstants.ToxicityWordFactor;
+                               player.AverageWordToxicity * DotaRankingConstants.ToxicityWordFactor +
+                               player.AverageIntentionalFeeding * DotaRankingConstants.ToxicityIntentionalFeedingFactor;
 
         player.RespectBans = GetPlayerHeroRespectBans(player.Heroes).Take(4).ToList();
 

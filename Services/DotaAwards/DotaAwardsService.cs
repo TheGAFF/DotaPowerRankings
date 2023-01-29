@@ -31,6 +31,11 @@ public class DotaAwardsService : IDotaAwardsService
             player.Awards.Add(new PowerRankedAward("Wholesome Player", DotaEnums.AwardColor.Green));
         }
 
+        foreach (var player in players.Where(x => x.SmurfFlag > 0))
+        {
+            player.Awards.Add(new PowerRankedAward("Smurf", DotaEnums.AwardColor.Blue));
+        }
+
         index = 0;
         foreach (var player in players.OrderByDescending(y => y.Heroes.Count(z => z.MatchesPlayed > 5))
                      .Take(5))
@@ -54,6 +59,7 @@ public class DotaAwardsService : IDotaAwardsService
             index++;
         }
 
+
         index = 0;
         foreach (var player in players.Where(x => x.Heroes.Any(y => y.TotalScore > 0))
                      .OrderByDescending(y => y.Heroes.Average(z => z.KDA)).Take(5))
@@ -62,6 +68,47 @@ public class DotaAwardsService : IDotaAwardsService
                 (DotaEnums.AwardColor)(index < 3 ? index : 3)));
             index++;
         }
+
+        index = 0;
+        foreach (var player in players.Where(x => x.RankTier < 70).OrderByDescending(y => y.AverageBestPos1).Take(3))
+        {
+            player.Awards.Add(new PowerRankedAward($"#{index + 1} Value Safe",
+                (DotaEnums.AwardColor)(index < 3 ? index : 3)));
+            index++;
+        }
+
+        index = 0;
+        foreach (var player in players.Where(x => x.RankTier < 70).OrderByDescending(y => y.AverageBestPos2).Take(3))
+        {
+            player.Awards.Add(new PowerRankedAward($"#{index + 1} Value Mid",
+                (DotaEnums.AwardColor)(index < 3 ? index : 3)));
+            index++;
+        }
+
+        index = 0;
+        foreach (var player in players.Where(x => x.RankTier < 70).OrderByDescending(y => y.AverageBestPos3).Take(3))
+        {
+            player.Awards.Add(new PowerRankedAward($"#{index + 1} Value Off",
+                (DotaEnums.AwardColor)(index < 3 ? index : 3)));
+            index++;
+        }
+
+        index = 0;
+        foreach (var player in players.Where(x => x.RankTier < 70).OrderByDescending(y => y.AverageBestPos4).Take(3))
+        {
+            player.Awards.Add(new PowerRankedAward($"#{index + 1} Value Pos 4",
+                (DotaEnums.AwardColor)(index < 3 ? index : 3)));
+            index++;
+        }
+
+        index = 0;
+        foreach (var player in players.Where(x => x.RankTier < 70).OrderByDescending(y => y.AverageBestPos5).Take(3))
+        {
+            player.Awards.Add(new PowerRankedAward($"#{index + 1} Value Pos 5",
+                (DotaEnums.AwardColor)(index < 3 ? index : 3)));
+            index++;
+        }
+
 
         index = 0;
         foreach (var player in players.Where(x => x.Heroes.Any(y => y.TotalScore > 0))

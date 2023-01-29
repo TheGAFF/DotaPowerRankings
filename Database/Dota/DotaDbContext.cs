@@ -11,6 +11,8 @@ public class DotaDbContext : DbContext
 
     public virtual DbSet<Match> Matches { get; set; } = null!;
     public virtual DbSet<Player> Players { get; set; } = null!;
+
+    public virtual DbSet<Team> Teams { get; set; } = null!;
     public virtual DbSet<PlayerMatch> PlayerMatches { get; set; } = null!;
     public virtual DbSet<PlayerMatchAbility> PlayerMatchAbilities { get; set; } = null!;
     public virtual DbSet<PlayerMatchItemUse> PlayerMatchItemUses { get; set; } = null!;
@@ -57,6 +59,9 @@ public class DotaDbContext : DbContext
                 .WithMany(p => p.PlayerMatches)
                 .HasForeignKey(d => d.MatchId);
         });
+
+        modelBuilder.Entity<Team>(entity => { entity.HasKey(e => new { e.TeamCaptainId, e.SeasonName }); });
+
 
         modelBuilder.Entity<PlayerMatchAbility>(entity =>
         {
