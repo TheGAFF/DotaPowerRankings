@@ -6,33 +6,206 @@ namespace RD2LPowerRankings.Services.DotaRanking;
 public class OpenAIPlayerSentenceBuilders
 {
     public static List<string> ReviewPrefixWords = new()
-        { "funny", "snarky", "serious", "thought-provoking", "witty", "exciting", "brutally honest", "hilarious" };
+    {
+        "very funny", "snarky", "serious", "very sarcastic", "brutally honest", "hilarious", "suspenseful",
+        "emotionally charged", "stand-up comedy styled",
+        "silly", "Donald Trump styled", "King James Bible styled", "pirate speak styled",
+        "snobby aristocratic styled", "surfer-dude styled", "redneck styled", "cowboy western styled",
+        "valley girl styled", "gangster styled", "loyal butler styled", "funny poetic", "fuckboi styled",
+        "sarcastic poetic", "cruel poetic", "social media influencer styled", "australian accent styled",
+        "game show host styled", "fairy tale narrator styled", "victorian styled", "Dr. Seuss styled",
+        "funny rap", "funny song", "vulgar song", "vulgar rap", "based", "very based", "hash tag filled", "joke filled",
+        "potty humor filled", "zoomer-word filled", "boomer humor filled"
+    };
 
-    public static List<string> RankWords = new() { "rank", "bracket", "tier", "level" };
+    public static List<string> RankWords = new()
+    {
+        "rank", "bracket", "tier", "level"
+    };
 
     public static List<string> ToxicityTier1Words = new() { "extremely toxic", "very toxic", "exceptionally toxic" };
 
     public static List<string> ToxicityTier2Words = new() { "somewhat toxic", "slightly toxic", "a little bit toxic" };
 
     public static List<string> WholesomeWords = new()
-        { "wholesome player", "friendly player", "nice dude" };
+    {
+        "wholesome player", "friendly player", "nice dude",
+        "kind-hearted gamer", "gentle soul", "helpful teammate",
+        "compassionate companion",
+        "empathetic ally"
+    };
 
-    public static List<string> PlayerWordUsage = new() { "one", "two" };
+    public static List<string> PlayerWordUsage = new() { "one", "two", "three" };
 
     public static List<string> TeamWordUsage = new() { "three", "four", "five" };
 
-    public static List<string> SuffixToxicBadWords = new() { "mother fucker", "shit", "hell", "damn", "fuck" };
+    public static List<string> SuffixToxicBadWords = new() { "motherfucker", "shit", "hell", "damn", "fuck" };
 
-    public static List<string> SuffixWholesomeWords = new() { "badass", "real one", "chad", "based" };
+    public static List<string> SuffixWholesomeWords = new()
+    {
+        "badass",
+        "real one",
+        "chad",
+        "based",
+        "hero",
+        "legend",
+        "ace",
+        "genius",
+        "wizard",
+        "savior",
+        "champion",
+        "prodigy",
+        "virtuoso",
+        "maestro",
+        "guru",
+        "conqueror",
+        "maverick",
+        "pioneer",
+        "trailblazer",
+        "innovator"
+    };
 
     public static List<string> GoodHeroWords = new()
     {
-        "amazing at", "solid at", "skilled at", "exceptional at", "amazing with", "skillful with", "plays a good"
+        "amazing at",
+        "solid at",
+        "skilled at",
+        "exceptional at",
+        "amazing with",
+        "skillful with",
+        "plays a good",
+        "masterful at",
+        "expert with",
+        "dominant with",
+        "excellent at",
+        "proficient at",
+        "adept at",
+        "outstanding with",
+        "impressive at",
+        "unrivaled with",
+        "terrific with",
+        "legendary at",
+        "spectacular at",
+        "remarkable with"
     };
 
     public static List<string> TeamCaptainWords = new()
     {
-        "team captain", "team leader", "captain of team", "team owner", "the captain"
+        "team captain",
+        "team leader",
+        "captain of team",
+        "team owner",
+        "the captain",
+        "squad commander"
+    };
+
+    public static List<string> Tier1MidLaneWords = new()
+    {
+        "great mid-laner",
+        "amazing mid player",
+        "skillful in midlane",
+        "dominates mid",
+        "master of midlane",
+        "midlane maestro",
+        "midlane dominator",
+        "strategist of the middle",
+        "ruler of the midlane"
+    };
+
+    public static List<string> Tier1SafeLaneWords = new()
+    {
+        "great safelane player",
+        "amazing position 1 player",
+        "skillful in the safelane",
+        "dominates as a position 1",
+        "great last-hitting",
+        "master of the safelane",
+        "safelane specialist",
+        "expert at farming",
+        "king of creep control",
+        "safelane superstar",
+        "lane equilibrium genius",
+        "position 1 prodigy",
+        "adept at lane control",
+        "safelane tactician",
+        "proficient farmer",
+        "superior lane management",
+        "early game dominator",
+        "efficient gold accumulator",
+        "exemplary carry player",
+        "unrivaled in creep farming"
+    };
+
+    public static List<string> Tier1OffLaneWords = new()
+    {
+        "great offlane player", "amazing position 3 player", "skillful in the offlane", "dominates as an offlaner",
+        "destroys safelaners"
+    };
+
+    public static List<string> Tier1SoftSupportWords = new()
+    {
+        "great position 4 player", "amazing soft support player", "skillful in the offlane as a support",
+        "dominates as an position 4"
+    };
+
+    public static List<string> Tier1HardSupportWords = new()
+    {
+        "great support player", "amazing position 5 player", "dominates as a support", "makes offlane players cry"
+    };
+
+
+    public static List<string> UnknownPlayerWords = new()
+    {
+        "mysterious player",
+        "dark horse",
+        "unknown",
+        "enigmatic player",
+        "new player",
+        "shadowy figure",
+        "unfamiliar face",
+        "emerging talent",
+        "hidden gem",
+        "mystery competitor",
+        "unseen warrior",
+        "sleeper agent",
+        "undercover gamer",
+        "veiled contender",
+        "incognito participant",
+        "unrecognized talent",
+        "obscure challenger",
+        "undiscovered strategist",
+        "anonymous force"
+    };
+
+    public static List<string> UnknownPlayerEndingSentences = new()
+    {
+        "Make up a funny Dota 2 fact about this player.",
+        "Make up a Dota 2 joke about this player.",
+        "Include talking about the player's name.",
+        "Use big words.",
+        "Imagine a legendary play they could make.",
+        "Describe their hypothetical signature hero.",
+        "Create a myth about their gaming prowess.",
+        "Invent a secret ability they might have.",
+        "Predict their breakout moment in the game.",
+        "Concoct a tale of their unknown origins.",
+        "Forecast an unexpected strategy they might use.",
+        "Speculate on their hidden in-game talents.",
+        "Exaggerate their potential impact in a match.",
+        "Compose a humorous theory about their playstyle.",
+        "Ponder on the mystery behind their gaming alias.",
+        "Fabricate a whimsical backstory for them.",
+        "Theorize about their secret training regimen.",
+        "Devise a quirky character trait they might have.",
+        "Suggest a surprising in-game alliance.",
+        "Elaborate on a fictitious epic duel they could win."
+    };
+
+    public static List<string> TeamEndingSentences = new()
+    {
+        $"Use the word {SuffixToxicBadWords.PickRandom()} at least {TeamWordUsage.PickRandom()} times.",
+        "Talk about their team name.",
+        "Say a vulgar word in every sentence."
     };
 
     public static List<string> GenerateTeamRankWords(int rank, IEnumerable<int?> teamRanks)
@@ -43,8 +216,26 @@ public class OpenAIPlayerSentenceBuilders
         {
             return new List<string>
             {
-                "best player on team", "most skillful on team", "the GOAT of the team", "the heavy lifter", "team MVP",
-                "top performer"
+                "best player on team",
+                "most skillful on team",
+                "the GOAT of the team",
+                "the heavy lifter",
+                "team MVP",
+                "top performer",
+                "pillar of the team",
+                "backbone of the squad",
+                "star player",
+                "key strategist",
+                "leading scorer",
+                "main playmaker",
+                "chief tactician",
+                "central figure",
+                "dominant force",
+                "game changer",
+                "veteran leader",
+                "premier player",
+                "chief carrier",
+                "linchpin of the team"
             };
         }
 
@@ -89,8 +280,16 @@ public class OpenAIPlayerSentenceBuilders
         {
             return new List<string>
             {
-                "top ranked", "immortal rank", "amazing game sense", "borderline pro player", "great map awareness",
-                "makes almost no mistakes"
+                "top ranked",
+                "immortal rank",
+                "amazing game sense",
+                "borderline pro player",
+                "great map awareness",
+                "makes almost no mistakes",
+                "exceptional mechanical skills",
+                "incredible reflexes",
+                "stellar positioning",
+                "tactical genius"
             };
         }
 
@@ -105,12 +304,20 @@ public class OpenAIPlayerSentenceBuilders
 
         if (badgeName == "Ancient")
         {
-            return new List<string> { "ancient tier", "ancient rank", "decent skill", "good player" };
+            return new List<string>
+            {
+                "ancient tier", "ancient rank", "decent skill", "has a grasp of advanced strategies",
+                "demonstrates strategic thinking"
+            };
         }
 
         if (badgeName == "Legend")
         {
-            return new List<string> { "average player", "middle of the pack" };
+            return new List<string>
+            {
+                "average player", "middle of the pack", "shows signs of tactical understanding",
+                "capable of impressive plays", "often holds their own in fights", "occasionally outplays higher ranks"
+            };
         }
 
         if (badgeName == "Archon")
@@ -132,77 +339,108 @@ public class OpenAIPlayerSentenceBuilders
     {
         if (hero == DotaEnums.Hero.AntiMage)
         {
-            return new List<string> { "mana-burns people", "afk jungles" };
+            return new List<string> { "mana-burns people", "afk jungles", "shows up 6-slotted" };
         }
 
         if (hero == DotaEnums.Hero.Axe)
         {
-            return new List<string> { "enjoys cutting the wave", "solid blink calls" };
+            return new List<string>
+            {
+                "enjoys cutting the wave", "solid blink calls", "terrifying presence in team fights",
+                "dominant in early game engagements"
+            };
         }
 
         if (hero == DotaEnums.Hero.Bane)
         {
-            return new List<string> { "gives people nightmares", "fiends grips people" };
+            return new List<string>
+            {
+                "gives people nightmares", "fiend's grip enthusiast", "excellent in isolating heroes",
+                "strong laning phase presence", "master of disabling key targets"
+            };
         }
 
         if (hero == DotaEnums.Hero.Bloodseeker)
         {
-            return new List<string> { "uses annoying rupture", "loves cookies" };
+            return new List<string>
+                { "uses annoying rupture", "loves cookies", "windranger's nightmare", "weaver's nightmare" };
         }
 
         if (hero == DotaEnums.Hero.Crystal_Maiden)
         {
-            return new List<string> { "very cool player", "hates her sister", "loves wolves" };
+            return new List<string>
+            {
+                "very cool player", "hates her sister", "loves wolves", "turns fights around with Freezing Field"
+            };
         }
 
         if (hero == DotaEnums.Hero.Drow_Ranger)
         {
-            return new List<string> { "afk jungles", "uses gust" };
+            return new List<string>
+            {
+                "afk jungles", "uses gust", "excellent at kiting enemies", "good at pushing lanes",
+                "excels in positioning and ranged combat"
+            };
         }
 
         if (hero == DotaEnums.Hero.Earthshaker)
         {
-            return new List<string> { "great at 5-man echos", "loves basketball" };
+            return new List<string>
+                { "great at 5-man echos", "loves basketball", "good fissure usage", "strong in crowd control" };
         }
 
         if (hero == DotaEnums.Hero.Juggernaut)
         {
-            return new List<string> { "loves to spin to win", "doesn't let healing ward die" };
+            return new List<string>
+            {
+                "loves to spin to win", "doesn't let healing ward die", "excels in one-on-one duels",
+                "effective at farming and pushing lanes"
+            };
         }
 
         if (hero == DotaEnums.Hero.Mirana)
         {
-            return new List<string> { "arrows creeps", "you will need detection against this player" };
+            return new List<string>
+            {
+                "arrows creeps", "you will need detection against this player", "can't catch this player",
+                "strong ganker"
+            };
         }
 
         if (hero == DotaEnums.Hero.Morphling)
         {
-            return new List<string> { "loves to morph into every hero", "hates ancient apparition" };
+            return new List<string>
+            {
+                "loves to morph into every hero", "hates ancient apparition", "elusive and hard to catch",
+                "good wave-form timings"
+            };
         }
 
         if (hero == DotaEnums.Hero.Shadow_Fiend)
         {
-            return new List<string> { "will triple raze you", "eats your soul" };
+            return new List<string> { "will triple raze you", "eats your soul", "creates pressure on the map" };
         }
 
         if (hero == DotaEnums.Hero.Phantom_Lancer)
         {
-            return new List<string> { "cancerous player", "has many illusions" };
+            return new List<string> { "good at faking the real illusion", "swarms enemy supports" };
         }
 
         if (hero == DotaEnums.Hero.Puck)
         {
-            return new List<string> { "annoying dream coils", "slippery" };
+            return new List<string>
+                { "annoying dream coils", "slippery", "elusive and hard to catch due to all the illusions" };
         }
 
         if (hero == DotaEnums.Hero.Pudge)
         {
-            return new List<string> { "has legendary hooks", "will chop you up" };
+            return new List<string>
+                { "has legendary hooks", "master of hook precision", "will chop you up with dismember" };
         }
 
         if (hero == DotaEnums.Hero.Razor)
         {
-            return new List<string> { "annoying to lane against", "will zap your ass" };
+            return new List<string> { "annoying to lane against", "will zap your ass", "damage siphoner" };
         }
 
         if (hero == DotaEnums.Hero.Sand_King)
@@ -217,32 +455,53 @@ public class OpenAIPlayerSentenceBuilders
 
         if (hero == DotaEnums.Hero.Sven)
         {
-            return new List<string> { "fast jungler", "prays for 5 man cleaves" };
+            return new List<string>
+            {
+                "solid god's strength timing", "solid positioning for cleaving enemies", "good war cry utilization",
+                "excellent blink into storm hammer opportunist"
+            };
         }
 
         if (hero == DotaEnums.Hero.Tiny)
         {
-            return new List<string> { "tosses you under tower", "loves the rolling stones" };
+            return new List<string>
+            {
+                "tosses you under tower", "excellent avalanche-toss combo execution",
+                "efficient tree grab usage for farming", "effective ganker"
+            };
         }
 
         if (hero == DotaEnums.Hero.Vengeful_Spirit)
         {
-            return new List<string> { "pair them with drow", "has good swap usage" };
+            return new List<string>
+            {
+                "excellent at initiating with magic missile",
+                "masterful positioning for wave of terror",
+                "proficient at warding and vision control",
+                "strong lane harassment",
+                "adept at creating pick-off opportunities",
+                "efficient at using swap for positioning and saves"
+            };
         }
 
         if (hero == DotaEnums.Hero.Windranger)
         {
-            return new List<string> { "great shackle shots", "snipes you with power shots" };
+            return new List<string>
+                { "great shackle shots", "snipes you with power shots", "effective focus fire targeting" };
         }
 
         if (hero == DotaEnums.Hero.Zeus)
         {
-            return new List<string> { "good at dewarding", "need pipe versus this player" };
+            return new List<string>
+            {
+                "excellent lightning bolt usage for vision and damage", "need pipe versus this player",
+                "effective ult timing for team fights and ganks"
+            };
         }
 
         if (hero == DotaEnums.Hero.Kunkka)
         {
-            return new List<string> { "loves to drink rum", "good boat usage" };
+            return new List<string> { "loves to drink rum", "good boat usage", "master of torrent setups" };
         }
 
         if (hero == DotaEnums.Hero.Lina)
@@ -262,12 +521,12 @@ public class OpenAIPlayerSentenceBuilders
 
         if (hero == DotaEnums.Hero.Slardar)
         {
-            return new List<string> { "will constantly bash you" };
+            return new List<string> { "will constantly bash you", "able to apply constant pressure on enemies" };
         }
 
         if (hero == DotaEnums.Hero.Tidehunter)
         {
-            return new List<string> { "good 5 man ravages", "tanky player" };
+            return new List<string> { "good 5 man ravages", "tanky player", "excellent initiator" };
         }
 
         if (hero == DotaEnums.Hero.Witch_Doctor)
@@ -487,7 +746,8 @@ public class OpenAIPlayerSentenceBuilders
 
         if (hero == DotaEnums.Hero.Alchemist)
         {
-            return new List<string> { "very greedy", "loves to afk farm" };
+            return new List<string>
+                { "very greedy", "loves to afk farm", "gives you Aghanim's Scepter", "occasionally blows himself up" };
         }
 
         if (hero == DotaEnums.Hero.Invoker)
@@ -512,7 +772,7 @@ public class OpenAIPlayerSentenceBuilders
 
         if (hero == DotaEnums.Hero.Brewmaster)
         {
-            return new List<string> { "micros pandas very well", "good cyclone usage" };
+            return new List<string> { "micros pandas very well", "good cyclone usage", "Might show up tipsy" };
         }
 
         if (hero == DotaEnums.Hero.Shadow_Demon)
@@ -577,7 +837,7 @@ public class OpenAIPlayerSentenceBuilders
 
         if (hero == DotaEnums.Hero.Io)
         {
-            return new List<string> { "clutch saves with ult", "keeps cores alive" };
+            return new List<string> { "clutch saves with ult", "keeps cores alive", "sustains cores" };
         }
 
         if (hero == DotaEnums.Hero.Visage)
@@ -628,7 +888,7 @@ public class OpenAIPlayerSentenceBuilders
 
         if (hero == DotaEnums.Hero.Skywrath_Mage)
         {
-            return new List<string> { "will solo pickoff enemies", "loves to play squishy heroes" };
+            return new List<string> { "will solo pick-off enemies", "loves to play squishy heroes" };
         }
 
         if (hero == DotaEnums.Hero.Abaddon)
@@ -748,49 +1008,14 @@ public class OpenAIPlayerSentenceBuilders
             return new List<string> { "stampedes toward enemies ferociously", "executes pulverize often" };
         }
 
+        if (hero == DotaEnums.Hero.Muerta)
+        {
+            return new List<string>
+                { "deletes foes with Pierce the Veil", "skillful dead shot usage", "solid zoning with The Calling" };
+        }
+
         throw new ArgumentOutOfRangeException(nameof(hero), hero, null);
     }
-
-    public static List<string> Tier1MidLaneWords = new()
-    {
-        "great mid-laner", "amazing mid player", "skillful in midlane", "dominates mid"
-    };
-
-    public static List<string> Tier1SafeLaneWords = new()
-    {
-        "great safelane player", "amazing position 1 player", "skillful in the safelane",
-        "dominates as a position 1", "great last-hitting"
-    };
-
-    public static List<string> Tier1OffLaneWords = new()
-    {
-        "great offlane player", "amazing position 3 player", "skillful in the offlane", "dominates as an offlaner",
-        "destroys safelaners"
-    };
-
-    public static List<string> Tier1SoftSupportWords = new()
-    {
-        "great position 4 player", "amazing soft support player", "skillful in the offlane as a support",
-        "dominates as an position 4"
-    };
-
-    public static List<string> Tier1HardSupportWords = new()
-    {
-        "great support player", "amazing position 5 player", "dominates as a support", "makes offlane players cry"
-    };
-
-
-    public static List<string> UnknownPlayerWords = new()
-    {
-        "mysterious player", "dark horse", "unknown", "enigmatic player", "new player"
-    };
-
-    public static List<string> UnknownPlayerEndingSentences = new()
-    {
-        "Make up a funny dota2 fact about this player.",
-        "Make up a dota2 joke about this player.",
-        "Use big words."
-    };
 
     public static List<string> GetTeamRankWords(int rank, decimal percentileRank)
     {
@@ -832,13 +1057,4 @@ public class OpenAIPlayerSentenceBuilders
         return new List<string>
             { "bottom of the barrel team", "bad skilled team", "one of the worst teams", "low rank team" };
     }
-
-    public static List<string> TeamEndingSentences = new()
-    {
-        "Use sophisticated words.",
-        $"Use the word {SuffixToxicBadWords.PickRandom()} {TeamWordUsage.PickRandom()} times.",
-        $"Use the word {SuffixWholesomeWords.PickRandom()} {TeamWordUsage.PickRandom()} times.",
-        "Talk about their team name.",
-        "Say a vulgar word in every sentence."
-    };
 }

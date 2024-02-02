@@ -13,8 +13,11 @@ used to fuel your React/Vue/whatever front-end.
    calculations come from the data here)
 5. [OpenDota API](https://docs.opendota.com/) ( You will need an [API key](https://www.opendota.com/api-keys)) (For
    toxicity score calculation)
-6. [OpenAI API](https://openai.com/api/) ( You will need an [API key](https://beta.openai.com/account/api-keys)) (We use
-   GPT-3 to generate player descriptions )
+6. [text-generation-webui](https://github.com/oobabooga/text-generation-webui) with one of Mistral's Mixtral model. You
+   can use
+   OpenAI instead of this, though.
+6. [OpenAI API](https://openai.com/api/) ( You will need an [API key](https://beta.openai.com/account/api-keys)) as an
+   alternative to `text-generation-webui`
 6. [Google Sheets API](https://developers.google.com/sheets/api/guides/concepts) (for consuming RD2L draft sheet data)
 7. [JetBrains Rider IDE](https://www.jetbrains.com/rider/download/) ( You can probably use VS or VS Code, but I haven't
    tested)

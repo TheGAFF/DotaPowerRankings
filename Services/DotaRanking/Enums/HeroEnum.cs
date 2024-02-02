@@ -126,6 +126,7 @@ public partial class DotaEnums
         Mars = 129,
         Dawnbreaker = 135,
         Marci = 136,
-        Primal_Beast = 137
+        Primal_Beast = 137,
+        Muerta = 138
     }
 }

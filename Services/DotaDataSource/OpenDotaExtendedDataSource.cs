@@ -90,7 +90,11 @@ public class OpenDotaExtendedDataSource : IDotaExtendedDataSource
         player.Loccountrycode = playerRaw["profile"]["loccountrycode"];
         player.IsContributor = playerRaw["profile"]["is_contributor"];
         player.RankTier = playerRaw["rank_tier"];
-        player.MmrEstimate = playerRaw["mmr_estimate"]["estimate"];
+        if (playerRaw["mmr_estimate"] != null && playerRaw["mmr_estimate"]["estimate"] != null)
+        {
+            player.MmrEstimate = playerRaw["mmr_estimate"]["estimate"];
+        }
+
         player.LeaderboardRank = playerRaw["leaderboard_rank"];
         player.CreatedAt ??= DateTime.Now.ToUniversalTime();
         player.UpdatedAt = DateTime.Now.ToUniversalTime();

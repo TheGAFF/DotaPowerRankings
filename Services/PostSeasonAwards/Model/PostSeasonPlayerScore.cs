@@ -9,12 +9,17 @@ public class PostSeasonPlayerScore
     public int TotalGames { get; set; }
     public int TotalObsPlaced { get; set; }
     public int TotalSentriesPlaced { get; set; }
+
+    public int TotalSmokesUsed { get; set; }
+
+    public int TotalSupportGoldSpent { get; set; }
+    public int TotalDustUsed { get; set; }
     public int TotalPings { get; set; }
     public int TotalTimeDead { get; set; }
     public int TotalRunesPickedUp { get; set; }
     public long TotalTowerDamage { get; set; }
     public long TotalGold { get; set; }
-    public decimal TotalStunSeconds { get; set; }
+    public long TotalStunSeconds { get; set; }
     public int TotalCampsStacked { get; set; }
     public int TotalCourierKills { get; set; }
     public int TotalDenies { get; set; }
@@ -25,7 +30,7 @@ public class PostSeasonPlayerScore
 
     public decimal AverageTeamFightParticipation { get; set; }
     public decimal AverageActionsPerMin { get; set; }
-    public decimal AverageLaneEffiencyPct { get; set; }
+    public decimal AverageLaneEfficiencyPct { get; set; }
 
     public int ItemTotalDivineRapiers { get; set; }
 
@@ -64,4 +69,8 @@ public class PostSeasonPlayerScore
     public int BestCoreOfGameCount { get; set; }
 
     public int BestSupportOfGameCount { get; set; }
+
+    public decimal TotalAvgGoldFed { get; set; }
+
+    public decimal TotalAvgGoldLost { get; set; }
 }

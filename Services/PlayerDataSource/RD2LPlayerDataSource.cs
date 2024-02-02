@@ -18,9 +18,9 @@ public class RD2LPlayerDataSource : IPlayerDataSource
     {
         _logger.LogInformation("Loading player(s) using sheet {SheetId}", sheetId);
 
-        var players = GetPlayersFromSheet(sheetId, PlayerDataSourceConstants.RD2LSheetRangePlayers, false);
+        var players = GetPlayersFromSheet(sheetId, PlayerDataSourceConstants.RD2LSheetRangePlayers);
 
-        var captains = GetPlayersFromSheet(sheetId, PlayerDataSourceConstants.RD2LSheetRangeCaptains, true);
+        var captains = GetCaptainsFromSheet(sheetId, PlayerDataSourceConstants.RD2LSheetRangeCaptains);
 
         _logger.LogInformation("Loaded {Count} player(s) info using sheet {SheetId}", players.Count, sheetId);
 
@@ -31,16 +31,18 @@ public class RD2LPlayerDataSource : IPlayerDataSource
     {
         _logger.LogInformation("Loading teams using sheet {SheetId}", sheetId);
 
-        var captains = GetPlayersFromSheet(sheetId, PlayerDataSourceConstants.RD2LSheetRangeCaptains, true);
+        var players = GetPlayersFromSheet(sheetId, PlayerDataSourceConstants.RD2LSheetRangePlayers);
 
-        var teams = GetTeamsFromSheet(sheetId, PlayerDataSourceConstants.RD2LSheetRangeTeams, captains);
+        var captains = GetCaptainsFromSheet(sheetId, PlayerDataSourceConstants.RD2LSheetRangeCaptains);
+
+        var teams = GetTeams(players, captains);
 
         _logger.LogInformation("Loaded {Count} teams using sheet {SheetId}", teams.Count, sheetId);
 
         return teams;
     }
 
-    private List<PlayerDataSourcePlayer> GetPlayersFromSheet(string sheetId, string sheetRange, bool isCaptain)
+    private List<PlayerDataSourcePlayer> GetPlayersFromSheet(string sheetId, string sheetRange)
     {
         var players = new List<PlayerDataSourcePlayer>();
 
@@ -50,27 +52,60 @@ public class RD2LPlayerDataSource : IPlayerDataSource
 
         foreach (var row in responsePlayers.Where(x => x.Count > 3))
         {
-            var playerId = row[7]?.ToString()?.Replace(@"https://www.dotabuff.com/players/", "");
-            var playerName = row[0]?.ToString() ?? PlayerDataSourceConstants.DefaultPlayerName;
+            var playerId = row[(int)PlayerColumnsSeason31.Dotabuff]?.ToString()
+                ?.Replace(@"https://www.dotabuff.com/players/", "");
+            var playerName = row[(int)PlayerColumnsSeason31.Name]?.ToString() ??
+                             PlayerDataSourceConstants.DefaultPlayerName;
+
+            var captainName = row[(int)PlayerColumnsSeason31.Captain]?.ToString() ??
+                              PlayerDataSourceConstants.DefaultPlayerName;
+
+            var cost = Convert.ToDecimal(row[(int)PlayerColumnsSeason31.Cost]?.ToString() ?? null);
+
+            var estimatedValue = Convert.ToDecimal(row[(int)PlayerColumnsSeason31.EstimatedValue]?.ToString() ?? null);
 
             if (long.TryParse(playerId, out var playerIdParsed))
             {
                 players.Add(new PlayerDataSourcePlayer
-                    { Id = playerIdParsed, Name = playerName, IsCaptain = isCaptain });
+                {
+                    Id = playerIdParsed, Name = playerName, IsCaptain = false, CaptainName = captainName, Cost = cost,
+                    EstimatedValue = estimatedValue
+                });
             }
         }
 
         return players;
     }
 
-    private List<PlayerDataSourceTeam> GetTeamsFromSheet(string sheetId, string sheetRange,
-        List<PlayerDataSourcePlayer> captains)
+    private List<PlayerDataSourcePlayer> GetCaptainsFromSheet(string sheetId, string sheetRange)
     {
-        var teams = new List<PlayerDataSourceTeam>();
+        var players = new List<PlayerDataSourcePlayer>();
 
         var responsePlayers = _sheetsService.Service.Spreadsheets.Values
             .Get(sheetId, sheetRange).Execute()
             .Values ?? new List<IList<object>>();
+
+        foreach (var row in responsePlayers.Where(x => x.Count > 3))
+        {
+            var playerId = row[(int)CaptainColumnsSeason31.Dotabuff]?.ToString()
+                ?.Replace(@"https://www.dotabuff.com/players/", "");
+            var playerName = row[(int)CaptainColumnsSeason31.Name]?.ToString() ??
+                             PlayerDataSourceConstants.DefaultPlayerName;
+
+            if (long.TryParse(playerId, out var playerIdParsed))
+            {
+                players.Add(new PlayerDataSourcePlayer
+                    { Id = playerIdParsed, Name = playerName, IsCaptain = true, CaptainName = playerName });
+            }
+        }
+
+        return players;
+    }
+
+    private List<PlayerDataSourceTeam> GetTeams(List<PlayerDataSourcePlayer> players,
+        List<PlayerDataSourcePlayer> captains)
+    {
+        var teams = new List<PlayerDataSourceTeam>();
 
         foreach (var captain in captains)
         {
@@ -79,30 +114,12 @@ public class RD2LPlayerDataSource : IPlayerDataSource
             team.Players = new List<PlayerDataSourcePlayer>();
             team.Players.Add(new PlayerDataSourcePlayer { IsCaptain = true, Id = captain.Id, Name = captain.Name });
 
-            var players = responsePlayers.Where(x => x[1].ToString() == captain.Name);
+            var teamPlayers = players.Where(x => x.CaptainName == captain.Name);
 
-            foreach (var player in players)
-            {
-                if (player.Count < 3)
-                {
-                    _logger.LogWarning("No player info found for captain {captain.Name}", captain.Name);
-                    continue;
-                }
-
-                var playerIdRaw = player[3].ToString()?.Replace(@"https://www.opendota.com/players/", "");
-                var playerName = player[0].ToString() ?? PlayerDataSourceConstants.DefaultPlayerName;
-
-                if (!long.TryParse(playerIdRaw, out var playerId))
-                {
-                    continue;
-                }
-
-                team.Players.Add(new PlayerDataSourcePlayer { Id = playerId, IsCaptain = false, Name = playerName });
-            }
+            team.Players.AddRange(teamPlayers);
 
             teams.Add(team);
         }
-
 
         return teams;
     }

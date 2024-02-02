@@ -7,10 +7,9 @@ public class PlayerDataSourceLeague
 {
     [DefaultValue("RD2L")] [Required] public string Name { get; set; } = null!;
 
-    [DefaultValue("season-28")] [Required] public string FileName { get; set; } = null!;
+    [DefaultValue("season-31")] [Required] public string FileName { get; set; } = null!;
 
     [Required] public List<PlayerDataSourceDivision> Divisions { get; set; } = new();
 
-
-    [DefaultValue(14507)] public int? LeagueId { get; set; }
+    [DefaultValue(15246)] public int? LeagueId { get; set; }
 }

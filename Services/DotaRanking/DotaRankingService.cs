@@ -17,12 +17,12 @@ namespace RD2LPowerRankings.Services.DotaRanking;
 public class DotaRankingService : IDotaRankingService
 {
     private readonly DotaDbContext _context;
+    private readonly IDotaAwardsService _dotaAwardsService;
     private readonly ILogger<DotaRankingService> _logger;
     private readonly IMapper _mapper;
+    private readonly IOpenAIService _openAiService;
     private readonly IPlayerDataSource _playerDataSource;
     private readonly IPostSeasonAwardService _postSeasonAwardService;
-    private readonly IDotaAwardsService _dotaAwardsService;
-    private readonly IOpenAIService _openAiService;
 
     public DotaRankingService(ILogger<DotaRankingService> logger, DotaDbContext context, IMapper mapper,
         IPlayerDataSource playerDataSource, IPostSeasonAwardService postSeasonAwardService,
@@ -319,14 +319,19 @@ public class DotaRankingService : IDotaRankingService
         powerRankedPlayer.AverageRandomHeroes = playerMatches.Count(x => x.Randomed) * 1M / playerMatches.Count * 1M;
 
         powerRankedPlayer =
-            _postSeasonAwardService.CalculatePostSeasonPlayerScore(powerRankedPlayer, league, playerMatches);
+            _postSeasonAwardService.CalculatePostSeasonPlayerScore(powerRankedPlayer, league,
+                playerMatches.Where(x =>
+                    x.LeagueId == league.LeagueId &&
+                    DateTimeOffset.FromUnixTimeSeconds(x.StartTime).DayOfWeek ==
+                    division.DayOfWeek).ToList());
 
         var heroesMatches = playerMatches.GroupBy(x => x.HeroId).Where(x => x.Any()).ToList();
 
         foreach (var heroMatches in heroesMatches)
         {
             powerRankedPlayer =
-                _postSeasonAwardService.CalculatePostSeasonHeroScore(powerRankedPlayer, league, heroMatches);
+                _postSeasonAwardService.CalculatePostSeasonHeroScore(powerRankedPlayer, league, heroMatches,
+                    division.DayOfWeek);
 
 
             var hero = new PowerRankedHero();
@@ -367,9 +372,12 @@ public class DotaRankingService : IDotaRankingService
                 (decimal)heroMatches.Count(x => x.Win) /
                 heroMatches.Count() * 1M;
 
-            hero.SkillAverageBadge =
-                Convert.ToInt32(heroMatches.Where(x => x.MatchRank != null && x.MatchRank != 0)
-                    .Average(x => x.MatchRank ?? 0M));
+            if (heroMatches.Any(x => x.MatchRank != null && x.MatchRank != 0))
+            {
+                hero.SkillAverageBadge =
+                    Convert.ToInt32(heroMatches.Where(x => x.MatchRank != null && x.MatchRank != 0)
+                        .Average(x => x.MatchRank ?? 0M));
+            }
 
             hero.SoloNormalMatchMakingPercent =
                 (decimal)heroMatches.Count(x => x.LobbyType == DotaEnums.LobbyType.Normal && x.PartyId == null) /
@@ -448,7 +456,7 @@ public class DotaRankingService : IDotaRankingService
 
         var impactWeight = hero.Impact * DotaRankingConstants.ImpactFactor;
 
-        hero.Score = (kdaWeight + impactWeight) * lobbyAdjustment;
+        hero.Score = (winRateGamesPlayedWeight + kdaWeight + impactWeight) * lobbyAdjustment;
 
         hero.MinimumScore = badgeWeight * lobbyAdjustment;
 

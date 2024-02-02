@@ -12,5 +12,5 @@ public interface IPostSeasonAwardService
 
 
     public PowerRankedPlayer CalculatePostSeasonHeroScore(PowerRankedPlayer powerRankedPlayer,
-        PowerRankedLeague league, IGrouping<DotaEnums.Hero, PlayerMatch> heroMatches);
+        PowerRankedLeague league, IGrouping<DotaEnums.Hero, PlayerMatch> heroMatches, DayOfWeek leagueDay);
 }

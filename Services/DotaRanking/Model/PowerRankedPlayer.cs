@@ -16,6 +16,10 @@ public class PowerRankedPlayer
 
     public string? Avatar { get; set; }
 
+    public int? Cost { get; set; }
+
+    public int? EstimatedValue { get; set; }
+
     [JsonIgnore] public int? SmurfFlag { get; set; }
 
     public string? Loccountrycode { get; set; }

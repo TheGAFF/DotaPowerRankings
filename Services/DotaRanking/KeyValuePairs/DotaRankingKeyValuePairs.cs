@@ -16,27 +16,35 @@ public static class DotaRankingKeyValuePairs
         new KeyValuePair<int, string>(14137, "RD2L Season 26"),
         new KeyValuePair<int, string>(14507, "RD2L Season 27"),
         new KeyValuePair<int, string>(14906, "RD2L Season 28"),
-
+        new KeyValuePair<int, string>(15246, "RD2L Season 29"),
+        new KeyValuePair<int, string>(15577, "RD2L Season 30"),
 
         new KeyValuePair<int, string>(5629, "RD2L Mini"),
         new KeyValuePair<int, string>(9858, "RD2L Weekend Cup"),
         new KeyValuePair<int, string>(12593, "RD2L Masters Season 1"),
         new KeyValuePair<int, string>(12950, "RD2L Masters Season 2"),
         new KeyValuePair<int, string>(13361, "RD2L Masters Season 3"),
-        
+
         new KeyValuePair<int, string>(12939, "FHDL Season 1"),
         new KeyValuePair<int, string>(13679, "FHDL Season 3"),
         new KeyValuePair<int, string>(14078, "FHDL Season 4"),
-        
+
         new KeyValuePair<int, string>(13941, "Phase Dota Circuit Season 1"),
         new KeyValuePair<int, string>(14107, "Phase Dota Circuit Season 2"),
         new KeyValuePair<int, string>(14416, "Phase DotA Circuit Archon - Season 1"),
-        
+
         new KeyValuePair<int, string>(13812, "AD2L Season 34"),
         new KeyValuePair<int, string>(14160, "AD2L Season 35"),
         new KeyValuePair<int, string>(14558, "AD2L Season 36"),
+        new KeyValuePair<int, string>(14954, "AD2L Season 37"),
+        new KeyValuePair<int, string>(15318, "AD2L Season 38"),
+        new KeyValuePair<int, string>(15742, "AD2L Season 39"),
 
+        new KeyValuePair<int, string>(15975, "AD2L Winter 3"),
 
+        new KeyValuePair<int, string>(15862, "League of Lads Season 14"),
+        new KeyValuePair<int, string>(15482, "League of Lads Season 13"),
+        new KeyValuePair<int, string>(14993, "League of Lads Season 12"),
         new KeyValuePair<int, string>(14648, "League of Lads Season 11"),
         new KeyValuePair<int, string>(14211, "League of Lads Season 10"),
         new KeyValuePair<int, string>(13807, "League of Lads Season 9"),
@@ -45,6 +53,8 @@ public static class DotaRankingKeyValuePairs
 
         new KeyValuePair<int, string>(12974, "LD2L Scrims"),
         new KeyValuePair<int, string>(14120, "LD2L Season 13"),
+        new KeyValuePair<int, string>(14996, "LD2L Season 15"),
+        new KeyValuePair<int, string>(16121, "LD2L Season 17"),
 
         new KeyValuePair<int, string>(13626, "Midwest Dota2 League Season 10"),
         new KeyValuePair<int, string>(14152, "Midwest Dota2 League Season 11"),

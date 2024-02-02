@@ -29,6 +29,7 @@ public partial class Player
     public int? LastMatchParseDate { get; set; }
     public int? BehaviorScore { get; set; }
 
+    public int? Cost { get; set; }
     public string? Description { get; set; }
     public virtual ICollection<PlayerWord> PlayerWords { get; set; }
 }

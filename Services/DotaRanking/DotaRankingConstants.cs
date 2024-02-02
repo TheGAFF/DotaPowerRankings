@@ -5,7 +5,7 @@ public static class DotaRankingConstants
     public const decimal LobbyWeightSoloRanked = 1.0M;
     public const decimal LobbyWeightPartyRanked = 0.9M;
     public const decimal LobbyWeightSoloNormal = 0.8M;
-    public const decimal LobbyWeightLeague = 1.2M;
+    public const decimal LobbyWeightLeague = 1.4M;
     public const decimal LobbyWeightPartyNormal = 0.8M;
     public const decimal LobbyWeightBattleCup = 0.8M;
 
