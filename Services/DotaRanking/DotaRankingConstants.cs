@@ -2,6 +2,21 @@
 
 public static class DotaRankingConstants
 {
+    public const int MaxGamesPlayed = 100;
+    public const int MaxBadge = 80;
+    public const int MinBadge = 11;
+    public const decimal MaxWinrate = 1.0M;
+    public const int MaxLeaderboardRank = 5000;
+    public const int MinLeaderboardRank = 1;
+    public const int MinImpact = -100;
+    public const int MaxImpact = 100;
+
+    public const decimal WeightWinrate = 2.0M;
+    public const decimal WeightGamesPlayed = 1.5M;
+    public const decimal WeightBadge = 8M;
+    public const decimal WeightLeaderboard = 4M;
+    public const decimal WeightImpact = 3M;
+
     public const decimal LobbyWeightSoloRanked = 1.0M;
     public const decimal LobbyWeightPartyRanked = 0.9M;
     public const decimal LobbyWeightSoloNormal = 0.8M;
@@ -12,7 +27,7 @@ public static class DotaRankingConstants
     public const int MaxGamesWeighted = 20;
     public const int MaxKDAWeighted = 20;
 
-    public const decimal WinRateGamesPlayedFactor = 10M;
+
     public const decimal LobbyTypeFactor = 1M;
     public const decimal KDAFactor = 2M;
     public const decimal ToxicityAbandonFactor = 10000M;

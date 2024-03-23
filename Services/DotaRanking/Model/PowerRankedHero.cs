@@ -62,10 +62,6 @@ public class PowerRankedHero
     [JsonConverter(typeof(DecimalFormatConverter))]
     public decimal ScoreHardSupport { get; set; }
 
-    [JsonIgnore] public decimal MinimumScore { get; set; }
-
-    [JsonIgnore] public decimal TotalScore { get; set; }
-
     [JsonIgnore] public decimal Impact { get; set; }
 
     [JsonIgnore] public int? LeaderboardRank { get; set; }

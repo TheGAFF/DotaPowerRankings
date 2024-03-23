@@ -424,19 +424,28 @@ public class DotaRankingService : IDotaRankingService
             return hero;
         }
 
-        // Retrieve closest badge weight for the given player hero.
-        var badgeWeight = DotaRankingKeyValuePairs.BadgeWeights.MinBy(x =>
-            Math.Abs(hero.SkillAverageBadge - (int)x.Key) + DateTime.Now.ToBinary() / 100000000000).Value;
+        var normalizedWinrate = hero.WinRate / DotaRankingConstants.MaxWinrate;
 
-        // Give leaderboard bonus
-        if (hero.LeaderboardRank.HasValue)
-        {
-            var leaderboardBonus = 700 - Convert.ToDecimal(hero.LeaderboardRank) / 6;
-            if (leaderboardBonus > 0)
-            {
-                badgeWeight += leaderboardBonus;
-            }
-        }
+        var normalizedGamesPlayed =
+            Math.Log10(hero.MatchesPlayed + 1) / Math.Log10(DotaRankingConstants.MaxGamesPlayed + 1);
+
+        var normalizedBadge = (hero.SkillAverageBadge - DotaRankingConstants.MinBadge) * 1M /
+            (DotaRankingConstants.MaxBadge - DotaRankingConstants.MinBadge) * 1M;
+
+        var normalizedLeaderboard =
+            1 - (decimal)(hero.LeaderboardRank ??
+                          DotaRankingConstants.MaxLeaderboardRank - DotaRankingConstants.MinLeaderboardRank) /
+            (DotaRankingConstants.MaxLeaderboardRank - DotaRankingConstants.MinLeaderboardRank) * 1M;
+
+
+        var normalizedImpact = (hero.Impact - DotaRankingConstants.MinImpact) /
+                               (DotaRankingConstants.MaxImpact - DotaRankingConstants.MinImpact);
+
+        var winRateScore = normalizedWinrate * DotaRankingConstants.WeightWinrate;
+        var badgesScore = normalizedBadge * DotaRankingConstants.WeightBadge;
+        var gamesPlayedScore = Convert.ToDecimal(normalizedGamesPlayed) * DotaRankingConstants.WeightGamesPlayed;
+        var impactScore = normalizedImpact * DotaRankingConstants.WeightImpact;
+        var leaderboardScore = normalizedLeaderboard * DotaRankingConstants.WeightLeaderboard;
 
         // Adjust weight based on match types played.
         var lobbyAdjustment =
@@ -447,34 +456,21 @@ public class DotaRankingService : IDotaRankingService
             hero.BattleCupMatchMakingPercent * DotaRankingConstants.LobbyWeightBattleCup +
             hero.LeagueMatchMakingPercent * DotaRankingConstants.LobbyWeightLeague;
 
-        // Calculate win rate / games played weight.
-        var winRateGamesPlayedWeight =
-            hero.WinRate * Math.Max(hero.MatchesPlayed, DotaRankingConstants.MaxGamesWeighted) *
-            DotaRankingConstants.WinRateGamesPlayedFactor;
+        hero.Score = (winRateScore + badgesScore + gamesPlayedScore + impactScore + leaderboardScore) * lobbyAdjustment;
 
-        var kdaWeight = Math.Max(hero.KDA, DotaRankingConstants.MaxKDAWeighted) * DotaRankingConstants.KDAFactor;
+        hero.ScoreSafelane = hero.Score + hero.Score * hero.SafelanePercent;
 
-        var impactWeight = hero.Impact * DotaRankingConstants.ImpactFactor;
+        hero.ScoreMidlane = hero.Score + hero.Score * hero.MidlanePercent;
 
-        hero.Score = (winRateGamesPlayedWeight + kdaWeight + impactWeight) * lobbyAdjustment;
+        hero.ScoreOfflane = hero.Score + hero.Score * hero.OfflanePercent;
 
-        hero.MinimumScore = badgeWeight * lobbyAdjustment;
+        hero.ScoreSoftSupport = hero.Score + hero.Score * hero.SoftSupportPercent;
 
-        hero.TotalScore = hero.Score + hero.MinimumScore;
+        hero.ScoreHardSupport = hero.Score + hero.Score * hero.HardSupportPercent;
 
-        hero.ScoreSafelane = hero.Score * hero.SafelanePercent;
+        hero.ScoreRoaming = hero.Score + hero.Score * hero.RoamingPercent;
 
-        hero.ScoreMidlane = hero.Score * hero.MidlanePercent;
-
-        hero.ScoreOfflane = hero.Score * hero.OfflanePercent;
-
-        hero.ScoreSoftSupport = hero.Score * hero.SoftSupportPercent;
-
-        hero.ScoreHardSupport = hero.Score * hero.HardSupportPercent;
-
-        hero.ScoreRoaming = hero.Score * hero.RoamingPercent;
-
-        hero.ScoreJungle = hero.Score * hero.JunglePercent;
+        hero.ScoreJungle = hero.Score + hero.Score * hero.JunglePercent;
 
         return hero;
     }
@@ -482,7 +478,7 @@ public class DotaRankingService : IDotaRankingService
     private static PowerRankedPlayer GetPlayerScore(PowerRankedPlayer player)
     {
         // Can't calculate player score if there aren't any heroes with scores
-        if (!player.Heroes.Any(x => x.TotalScore > 0))
+        if (!player.Heroes.Any(x => x.Score > 0))
         {
             return player;
         }
@@ -529,9 +525,7 @@ public class DotaRankingService : IDotaRankingService
             player.JungleScore = Math.Round(jungleHeroes.Average(x => x.ScoreJungle));
         }
 
-        var minimumScore = player.Heroes.Average(x => x.MinimumScore * 5M);
-
-        player.OverallScore = minimumScore + player.SafelaneScore + player.MidlaneScore + player.OfflaneScore +
+        player.OverallScore = player.SafelaneScore + player.MidlaneScore + player.OfflaneScore +
                               player.SoftSupportScore + player.HardSupportScore;
 
         // Calculate toxicity score

@@ -53,6 +53,8 @@ public class PostSeasonAwardService : IPostSeasonAwardService
                 playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.HeroHealing);
             powerRankedPlayer.PostSeasonPlayerScore.TotalPings =
                 playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.Pings);
+            powerRankedPlayer.PostSeasonPlayerScore.TotalScans =
+                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.Scans ?? 0);
             powerRankedPlayer.PostSeasonPlayerScore.TotalCampsStacked =
                 playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.CampsStacked);
             powerRankedPlayer.PostSeasonPlayerScore.TotalCourierKills =
@@ -69,6 +71,8 @@ public class PostSeasonAwardService : IPostSeasonAwardService
                 playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.SenPlaced);
             powerRankedPlayer.PostSeasonPlayerScore.TotalStunSeconds =
                 playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.StunDuration);
+            powerRankedPlayer.PostSeasonPlayerScore.TotalSlowsSeconds =
+                playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.SlowDuration);
             powerRankedPlayer.PostSeasonPlayerScore.TotalTimeDead =
                 playerMatches.Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.LifeStateDead);
             powerRankedPlayer.PostSeasonPlayerScore.TotalTowerDamage =
@@ -165,8 +169,16 @@ public class PostSeasonAwardService : IPostSeasonAwardService
             powerRankedPlayer.PostSeasonPlayerScore.SmokeKillCount = playerMatches
                 .Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.SmokeKillCount);
 
+            powerRankedPlayer.PostSeasonPlayerScore.InvisibleKillCount = playerMatches
+                .Where(x => x.LeagueId == league.LeagueId.Value && x.HeroId != DotaEnums.Hero.Riki &&
+                            x.HeroId != DotaEnums.Hero.Clinkz && x.HeroId != DotaEnums.Hero.Bounty_Hunter)
+                .Sum(x => x.InvisibleKillCount);
+
             powerRankedPlayer.PostSeasonPlayerScore.GankKillCount = playerMatches
                 .Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.GankKillCount);
+
+            powerRankedPlayer.PostSeasonPlayerScore.TpKillCount = playerMatches
+                .Where(x => x.LeagueId == league.LeagueId.Value).Sum(x => x.TpRecentlyKillCount);
 
             powerRankedPlayer.PostSeasonPlayerScore.AverageImpact = playerMatches
                 .Where(x => x.LeagueId == league.LeagueId.Value).Average(x => x.Imp * 1M);
@@ -270,16 +282,16 @@ public class PostSeasonAwardService : IPostSeasonAwardService
         };
         awards.Add(award);
 
-        players = division.Teams.SelectMany(x => x.Players).OrderByDescending(x => x.PostSeasonPlayerScore.TotalPings)
+        players = division.Teams.SelectMany(x => x.Players).OrderByDescending(x => x.PostSeasonPlayerScore.TotalScans)
             .Take(2).ToArray();
         award = new PostSeasonAward
         {
             Category = DotaEnums.PostSeasonAwardCategory.Misc,
-            Name = "Most Pings",
+            Name = "Most Scans",
             Awardee = players[0].DraftName!,
-            Value = $"{players[0].PostSeasonPlayerScore.TotalPings:N0}",
+            Value = $"{players[0].PostSeasonPlayerScore.TotalScans:N0}",
             RunnerUp = players[1].DraftName!,
-            RunnerUpValue = $"{players[1].PostSeasonPlayerScore.TotalPings:N0}"
+            RunnerUpValue = $"{players[1].PostSeasonPlayerScore.TotalScans:N0}"
         };
         awards.Add(award);
 
@@ -431,12 +443,26 @@ public class PostSeasonAwardService : IPostSeasonAwardService
         award = new PostSeasonAward
         {
             Category = DotaEnums.PostSeasonAwardCategory.Misc,
-            Name = "Most Stuns (Seconds)",
+            Name = "Most Stuns (seconds)",
             Awardee = players[0].DraftName!,
             Value = $"{TimeSpan.FromMilliseconds(players[0].PostSeasonPlayerScore.TotalStunSeconds).TotalSeconds:N0}",
             RunnerUp = players[1].DraftName!,
             RunnerUpValue =
                 $"{TimeSpan.FromMilliseconds(players[1].PostSeasonPlayerScore.TotalStunSeconds).TotalSeconds:N0}"
+        };
+        awards.Add(award);
+
+        players = division.Teams.SelectMany(x => x.Players)
+            .OrderByDescending(x => x.PostSeasonPlayerScore.TotalSlowsSeconds).Take(2).ToArray();
+        award = new PostSeasonAward
+        {
+            Category = DotaEnums.PostSeasonAwardCategory.Misc,
+            Name = "Most Slows (seconds)",
+            Awardee = players[0].DraftName!,
+            Value = $"{TimeSpan.FromMilliseconds(players[0].PostSeasonPlayerScore.TotalSlowsSeconds).TotalSeconds:N0}",
+            RunnerUp = players[1].DraftName!,
+            RunnerUpValue =
+                $"{TimeSpan.FromMilliseconds(players[1].PostSeasonPlayerScore.TotalSlowsSeconds).TotalSeconds:N0}"
         };
         awards.Add(award);
 
@@ -519,6 +545,19 @@ public class PostSeasonAwardService : IPostSeasonAwardService
         awards.Add(award);
 
         players = division.Teams.SelectMany(x => x.Players)
+            .OrderByDescending(x => x.PostSeasonPlayerScore.TpKillCount).Take(2).ToArray();
+        award = new PostSeasonAward
+        {
+            Category = DotaEnums.PostSeasonAwardCategory.Core,
+            Name = "Most TP Kills",
+            Awardee = players[0].DraftName!,
+            Value = $"{players[0].PostSeasonPlayerScore.TpKillCount}",
+            RunnerUp = players[1].DraftName!,
+            RunnerUpValue = $"{players[1].PostSeasonPlayerScore.TpKillCount}"
+        };
+        awards.Add(award);
+
+        players = division.Teams.SelectMany(x => x.Players)
             .OrderByDescending(x => x.PostSeasonPlayerScore.BestCoreOfGameCount).Take(2).ToArray();
         award = new PostSeasonAward
         {
@@ -552,6 +591,19 @@ public class PostSeasonAwardService : IPostSeasonAwardService
             Value = $"{players[0].PostSeasonPlayerScore.SmokeKillCount}",
             RunnerUp = players[1].DraftName!,
             RunnerUpValue = $"{players[1].PostSeasonPlayerScore.SoloKillCount}"
+        };
+        awards.Add(award);
+
+        players = division.Teams.SelectMany(x => x.Players)
+            .OrderByDescending(x => x.PostSeasonPlayerScore.InvisibleKillCount).Take(2).ToArray();
+        award = new PostSeasonAward
+        {
+            Category = DotaEnums.PostSeasonAwardCategory.Misc,
+            Name = "Invisible Kill Count",
+            Awardee = players[0].DraftName!,
+            Value = $"{players[0].PostSeasonPlayerScore.InvisibleKillCount}",
+            RunnerUp = players[1].DraftName!,
+            RunnerUpValue = $"{players[1].PostSeasonPlayerScore.InvisibleKillCount}"
         };
         awards.Add(award);
 
@@ -784,7 +836,7 @@ public class PostSeasonAwardService : IPostSeasonAwardService
         award = new PostSeasonAward
         {
             Category = DotaEnums.PostSeasonAwardCategory.Team,
-            Name = "Longest Game Won (Minutes)",
+            Name = "Longest Game Won (minutes)",
             Awardee = $"Team {teams[0].Name}",
             Value =
                 $"{TimeSpan.FromSeconds(teams[0].Players.Max(x => x.PostSeasonPlayerScore.LongestWonGameLength)).TotalMinutes:N0}",
@@ -799,7 +851,7 @@ public class PostSeasonAwardService : IPostSeasonAwardService
         award = new PostSeasonAward
         {
             Category = DotaEnums.PostSeasonAwardCategory.Team,
-            Name = "Shortest Game Won (Minutes)",
+            Name = "Shortest Game Won (minutes)",
             Awardee = $"Team {teams[0].Name}",
             Value =
                 $"{TimeSpan.FromSeconds(teams[0].Players.Max(x => x.PostSeasonPlayerScore.ShortestWonGameLength)).TotalMinutes:N0}",
@@ -840,17 +892,17 @@ public class PostSeasonAwardService : IPostSeasonAwardService
         awards.Add(award);
 
         teams = division.Teams.OrderByDescending(x =>
-            x.Players.Sum(y => y.PostSeasonPlayerScore.TotalPings)).Take(2).ToArray();
+            x.Players.Sum(y => y.PostSeasonPlayerScore.TotalScans)).Take(2).ToArray();
         award = new PostSeasonAward
         {
             Category = DotaEnums.PostSeasonAwardCategory.Team,
-            Name = "Most Pings",
+            Name = "Most Scans",
             Awardee = $"Team {teams[0].Name}",
             Value =
-                $"{teams[0].Players.Sum(y => y.PostSeasonPlayerScore.TotalPings):N0}",
+                $"{teams[0].Players.Sum(y => y.PostSeasonPlayerScore.TotalScans):N0}",
             RunnerUp = $"Team {teams[1].Name}",
             RunnerUpValue =
-                $"{teams[1].Players.Sum(y => y.PostSeasonPlayerScore.TotalPings):N0}"
+                $"{teams[1].Players.Sum(y => y.PostSeasonPlayerScore.TotalScans):N0}"
         };
         awards.Add(award);
 
@@ -870,6 +922,21 @@ public class PostSeasonAwardService : IPostSeasonAwardService
         awards.Add(award);
 
         teams = division.Teams.OrderByDescending(x =>
+            x.Players.Sum(y => y.PostSeasonPlayerScore.InvisibleKillCount)).Take(2).ToArray();
+        award = new PostSeasonAward
+        {
+            Category = DotaEnums.PostSeasonAwardCategory.Team,
+            Name = "Most Invisible Kills",
+            Awardee = $"Team {teams[0].Name}",
+            Value =
+                $"{teams[0].Players.Sum(y => y.PostSeasonPlayerScore.InvisibleKillCount):N0}",
+            RunnerUp = $"Team {teams[1].Name}",
+            RunnerUpValue =
+                $"{teams[1].Players.Sum(y => y.PostSeasonPlayerScore.InvisibleKillCount):N0}"
+        };
+        awards.Add(award);
+
+        teams = division.Teams.OrderByDescending(x =>
             x.Players.Sum(y => y.PostSeasonPlayerScore.GankKillCount)).Take(2).ToArray();
         award = new PostSeasonAward
         {
@@ -885,11 +952,26 @@ public class PostSeasonAwardService : IPostSeasonAwardService
         awards.Add(award);
 
         teams = division.Teams.OrderByDescending(x =>
+            x.Players.Sum(y => y.PostSeasonPlayerScore.TpKillCount)).Take(2).ToArray();
+        award = new PostSeasonAward
+        {
+            Category = DotaEnums.PostSeasonAwardCategory.Team,
+            Name = "Most TP Kills",
+            Awardee = $"Team {teams[0].Name}",
+            Value =
+                $"{teams[0].Players.Sum(y => y.PostSeasonPlayerScore.TpKillCount):N0}",
+            RunnerUp = $"Team {teams[1].Name}",
+            RunnerUpValue =
+                $"{teams[1].Players.Sum(y => y.PostSeasonPlayerScore.TpKillCount):N0}"
+        };
+        awards.Add(award);
+
+        teams = division.Teams.OrderByDescending(x =>
             x.Players.Sum(y => y.PostSeasonPlayerScore.TotalStunSeconds)).Take(2).ToArray();
         award = new PostSeasonAward
         {
             Category = DotaEnums.PostSeasonAwardCategory.Team,
-            Name = "Most Stuns (Seconds)",
+            Name = "Most Stuns (seconds)",
             Awardee = $"Team {teams[0].Name}",
             Value =
                 $"{TimeSpan.FromMilliseconds(teams[0].Players.Sum(y => y.PostSeasonPlayerScore.TotalStunSeconds)).TotalSeconds:N0}",

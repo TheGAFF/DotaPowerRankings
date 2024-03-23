@@ -18,6 +18,7 @@ public static class DotaRankingKeyValuePairs
         new KeyValuePair<int, string>(14906, "RD2L Season 28"),
         new KeyValuePair<int, string>(15246, "RD2L Season 29"),
         new KeyValuePair<int, string>(15577, "RD2L Season 30"),
+        new KeyValuePair<int, string>(15578, "RD2L Season 31"),
 
         new KeyValuePair<int, string>(5629, "RD2L Mini"),
         new KeyValuePair<int, string>(9858, "RD2L Weekend Cup"),

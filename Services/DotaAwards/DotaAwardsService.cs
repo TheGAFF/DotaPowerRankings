@@ -15,7 +15,7 @@ public class DotaAwardsService : IDotaAwardsService
 
             foreach (var player in players
                          .OrderByDescending(y =>
-                             y.Heroes.FirstOrDefault(z => z.HeroId == hero && z.MatchesPlayed > 3)?.TotalScore ?? 0)
+                             y.Heroes.FirstOrDefault(z => z.HeroId == hero && z.MatchesPlayed > 3)?.Score ?? 0)
                          .Take(3))
             {
                 player.Awards.Add(new PowerRankedAward(
@@ -61,7 +61,7 @@ public class DotaAwardsService : IDotaAwardsService
 
 
         index = 0;
-        foreach (var player in players.Where(x => x.Heroes.Any(y => y.TotalScore > 0))
+        foreach (var player in players.Where(x => x.Heroes.Any(y => y.Score > 0))
                      .OrderByDescending(y => y.Heroes.Average(z => z.KDA)).Take(5))
         {
             player.Awards.Add(new PowerRankedAward($"#{index + 1} Highest Avg KDA",
@@ -111,8 +111,8 @@ public class DotaAwardsService : IDotaAwardsService
 
 
         index = 0;
-        foreach (var player in players.Where(x => x.Heroes.Any(y => y.TotalScore > 0))
-                     .OrderByDescending(y => y.Heroes.Where(z => z.TotalScore > 0).Average(z => z.WinRate)).Take(5))
+        foreach (var player in players.Where(x => x.Heroes.Any(y => y.Score > 0))
+                     .OrderByDescending(y => y.Heroes.Where(z => z.Score > 0).Average(z => z.WinRate)).Take(5))
         {
             player.Awards.Add(new PowerRankedAward($"#{index + 1} Highest win rate",
                 (DotaEnums.AwardColor)(index < 3 ? index : 3)));
@@ -120,8 +120,8 @@ public class DotaAwardsService : IDotaAwardsService
         }
 
         index = 0;
-        foreach (var player in players.Where(x => x.Heroes.Any(y => y.TotalScore > 0))
-                     .OrderBy(y => y.Heroes.Where(z => z.TotalScore > 0).Average(z => z.WinRate)).Take(5))
+        foreach (var player in players.Where(x => x.Heroes.Any(y => y.Score > 0))
+                     .OrderBy(y => y.Heroes.Where(z => z.Score > 0).Average(z => z.WinRate)).Take(5))
         {
             player.Awards.Add(new PowerRankedAward($"#{index + 1} Lowest win rate", DotaEnums.AwardColor.Red));
             index++;
@@ -339,7 +339,7 @@ public class DotaAwardsService : IDotaAwardsService
         foreach (var player in players
                      .OrderByDescending(y => y.AverageArmletToggles).Take(1))
         {
-            player.Awards.Add(new PowerRankedAward($"Best Armlet Toggler",
+            player.Awards.Add(new PowerRankedAward("Best Armlet Toggler",
                 DotaEnums.AwardColor.Green));
             index++;
         }
