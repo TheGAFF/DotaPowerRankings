@@ -1,10 +1,11 @@
 ﻿namespace RD2LPowerRankings.Database.Dota.Models;
 
-public partial class Player
+public class Player
 {
     public Player()
     {
         PlayerWords = new HashSet<PlayerWord>();
+        PlayerDescriptions = new HashSet<PlayerDescription>();
     }
 
     public long PlayerId { get; set; }
@@ -32,4 +33,6 @@ public partial class Player
     public int? Cost { get; set; }
     public string? Description { get; set; }
     public virtual ICollection<PlayerWord> PlayerWords { get; set; }
+
+    public virtual ICollection<PlayerDescription> PlayerDescriptions { get; set; }
 }

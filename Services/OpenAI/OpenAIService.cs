@@ -36,32 +36,6 @@ public class OpenAIService : IOpenAIService
         _httpClient.BaseAddress = new Uri(_config["OpenAI:ApiUrl"] ?? "");
     }
 
-    public async Task<List<PowerRankedPlayer>> GeneratePlayerReviews(List<PowerRankedPlayer> players)
-    {
-        foreach (var player in players)
-        {
-            var dbPlayer = await _context.Players.FirstAsync(x => x.PlayerId == player.PlayerId);
-
-            if (dbPlayer.Description != null)
-            {
-                player.PlayerReview.Result = dbPlayer.Description;
-                continue;
-            }
-
-            player.PlayerReview = GeneratePlayerPrompt(player);
-
-            player.PlayerReview.Result = await GetReviewFromOpenAi(player.PlayerReview.Prompt, 500);
-
-            dbPlayer.Description = player.PlayerReview.Result;
-
-            dbPlayer.Description = CleanUpDescription(dbPlayer.Description);
-
-            await _context.Players.Upsert(dbPlayer).On(x => x.PlayerId).RunAsync();
-        }
-
-        return players;
-    }
-
     public async Task<List<PowerRankedTeam>> GenerateTeamReviews(List<PowerRankedTeam> teams, string seasonName)
     {
         foreach (var team in teams)
@@ -87,7 +61,7 @@ public class OpenAIService : IOpenAIService
             }
 
 
-            team.TeamReview.Result = await GetReviewFromOpenAi(team.TeamReview.Prompt, 1500);
+            team.TeamReview.Result = await GetReviewFromKoboldAi(team.TeamReview.Prompt, 1024);
 
             dbTeam.Description = team.TeamReview.Result;
 
@@ -96,6 +70,43 @@ public class OpenAIService : IOpenAIService
         }
 
         return teams;
+    }
+
+    public async Task<List<PowerRankedPlayer>> GeneratePlayerReviews(List<PowerRankedPlayer> players, string seasonName)
+    {
+        foreach (var player in players)
+        {
+            var playerDescription =
+                await _context.PlayerDescriptions.FirstOrDefaultAsync(x =>
+                    x.PlayerId == player.PlayerId && x.SeasonName == seasonName);
+
+            if (playerDescription != null)
+            {
+                player.PlayerReview.Result = playerDescription.Description;
+                continue;
+            }
+
+            playerDescription = new PlayerDescription();
+            playerDescription.PlayerId = player.PlayerId;
+            playerDescription.UpdatedAt = DateTime.Now.ToUniversalTime();
+
+            player.PlayerReview = GeneratePlayerPrompt(player);
+
+            player.PlayerReview.Result = await GetReviewFromKoboldAi(player.PlayerReview.Prompt, 384);
+
+            playerDescription.Description = player.PlayerReview.Result ?? "";
+
+            playerDescription.SeasonName = seasonName;
+
+            playerDescription.Prompt = player.PlayerReview.Prompt;
+
+            playerDescription.Description = CleanUpDescription(playerDescription.Description) ?? "";
+
+            await _context.PlayerDescriptions.Upsert(playerDescription).On(x => new { x.PlayerId, x.SeasonName })
+                .RunAsync();
+        }
+
+        return players;
     }
 
     private PlayerReview GeneratePlayerPrompt(PowerRankedPlayer player)
@@ -169,12 +180,20 @@ public class OpenAIService : IOpenAIService
                 OpenAIPlayerSentenceBuilders.UnknownPlayerEndingSentences.PickRandom());
         }
 
+
         player.PlayerReview.Attributes = player.PlayerReview.Attributes.Shuffle().ToList();
         player.PlayerReview.ReviewPrefixAdjective = OpenAIPlayerSentenceBuilders.ReviewPrefixWords.PickRandom();
 
         player.PlayerReview.Prompt =
-            $"Write a {player.PlayerReview.ReviewPrefixAdjective} 150-250 word power ranking review on a dota2 player named {player.DraftName} " +
+            $"Write a {player.PlayerReview.ReviewPrefixAdjective} power ranking review on a dota2 player named {player.DraftName} " +
             $"who has the following attributes: {string.Join(",", player.PlayerReview.Attributes)}. {string.Join("", player.PlayerReview.EndingSentences)}";
+
+        if (!string.IsNullOrWhiteSpace(player.Statement))
+        {
+            player.PlayerReview.Prompt +=
+                $". Use this in your review about what the player says about themselves: '{player.Statement}'";
+        }
+
         return player.PlayerReview;
     }
 
@@ -259,7 +278,7 @@ public class OpenAIService : IOpenAIService
         var httpContent = new StringContent(JsonConvert.SerializeObject(new CompletionRequest
         {
             Prompt = prompt,
-            Model = "nous-hermes-2-mixtral-8x7b-sft.Q5_0.gguf",
+            Model = "estopianmaid-13b.Q5_K_M.gguf",
             MaxTokens = maxTokens,
             Temperature = temperature
         }), Encoding.UTF8, "application/json");
@@ -274,6 +293,46 @@ public class OpenAIService : IOpenAIService
         {
             dynamic rawResults = JsonConvert.DeserializeObject(content)!;
             return rawResults["choices"][0]["text"];
+        }
+        catch (Exception ex)
+        {
+            return null;
+        }
+    }
+
+    private async Task<string> GetReviewFromKoboldAi(string prompt, int maxTokens)
+    {
+        var random = new Random();
+        var temperature = random.NextDouble() * 0.2 + 0.9;
+
+        var httpContent = new StringContent(JsonConvert.SerializeObject(new KoBoldCompletionRequest
+        {
+            Prompt = $"<|im_end|>\\n<|im_start|>user\\n{prompt}<|im_end|>\\n<|im_start|>assistant\\n",
+            MaxContextLength = 2048,
+            MaxLength = maxTokens,
+            Temperature = temperature,
+            Quiet = false,
+            RepPen = 1.1,
+            RepPenRange = 256,
+            RepPenSlope = 1,
+            Tfs = 1,
+            TopA = 0,
+            TopK = 100,
+            TopP = 1,
+            Typical = 1,
+            StopSequence = ["<|im_end|>\\n<|im_start|>user", "<|im_end|>\\n<|im_start|>assistant"]
+        }), Encoding.UTF8, "application/json");
+
+        var response = await _httpClient.PostAsync("/api/v1/generate", httpContent);
+
+        response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync();
+
+        try
+        {
+            dynamic rawResults = JsonConvert.DeserializeObject(content)!;
+            return rawResults["results"][0]["text"];
         }
         catch (Exception ex)
         {

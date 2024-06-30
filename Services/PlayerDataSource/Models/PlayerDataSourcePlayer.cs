@@ -7,7 +7,9 @@ public class PlayerDataSourcePlayer
     public bool IsCaptain { get; set; }
     public string CaptainName { get; set; } = default!;
 
-    public decimal? Cost { get; set; }
+    public int? Cost { get; set; }
 
     public decimal? EstimatedValue { get; set; }
+
+    public string PlayerStatement { get; set; }
 }

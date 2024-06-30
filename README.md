@@ -37,8 +37,21 @@ used to fuel your React/Vue/whatever front-end.
 2. `[POST] /Dota/Pre-Season-Rankings` - Generates Player and Team Ranking Info
 3. `[POST] /Dota/Post-Season-Rankings` - After the season is over, this generates Player, Team, AND Post Season Awards.
 
+## Migrations
+
+Ensure you are on the latest Entity Framework tooling:
+
+`dotnet tool install -g dotnet-ef`
+
+To make schema changes, you can run the following command:
+
+`dotnet ef migrations add MyDbSchemaChanges --project RD2LPowerRankings
+`
+
+Then apply your changes like so:
+
+`dotnet ef database update --project RD2LPowerRankings`
+
 ## Road Map
 
-1. Add League / Team parsing via Stratz
-2. More OpenAI text generation
-3. rd2l.gg info gathering (via their APIs or web-scraping)
+1. More AI Text Generation (ex. match-ups)

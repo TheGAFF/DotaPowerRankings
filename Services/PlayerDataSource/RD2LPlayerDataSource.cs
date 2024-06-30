@@ -52,26 +52,32 @@ public class RD2LPlayerDataSource : IPlayerDataSource
 
         foreach (var row in responsePlayers.Where(x => x.Count > 3))
         {
-            var playerId = row[(int)PlayerColumnsSeason31.Dotabuff]?.ToString()
+            var playerId = row[(int)PlayerColumnsSeason32.Dotabuff]?.ToString()
                 ?.Replace(@"https://www.dotabuff.com/players/", "");
-            var playerName = row[(int)PlayerColumnsSeason31.Name]?.ToString() ??
+            var playerName = row[(int)PlayerColumnsSeason32.Name]?.ToString() ??
                              PlayerDataSourceConstants.DefaultPlayerName;
 
-            var captainName = row[(int)PlayerColumnsSeason31.Captain]?.ToString() ??
+            var captainName = row[(int)PlayerColumnsSeason32.PickedBy]?.ToString() ??
                               PlayerDataSourceConstants.DefaultPlayerName;
 
-            var cost = Convert.ToDecimal(row[(int)PlayerColumnsSeason31.Cost]?.ToString() ?? null);
+            var cost = 0; //Convert.ToDecimal(row[(int)PlayerColumnsSeason31.Cost]?.ToString() ?? null);
 
-            var estimatedValue = Convert.ToDecimal(row[(int)PlayerColumnsSeason31.EstimatedValue]?.ToString() ?? null);
+            var playerStatement = row.Count <= (int)PlayerColumnsSeason32.Statement
+                ? ""
+                : row[(int)PlayerColumnsSeason32.Statement]?.ToString() ?? "";
+
+            //   var estimatedValue = Convert.ToDecimal(row[(int)PlayerColumnsSeason32.Value]?.ToString() ?? null);
 
             if (long.TryParse(playerId, out var playerIdParsed))
             {
                 players.Add(new PlayerDataSourcePlayer
                 {
                     Id = playerIdParsed, Name = playerName, IsCaptain = false, CaptainName = captainName, Cost = cost,
-                    EstimatedValue = estimatedValue
+                    EstimatedValue = 0M, PlayerStatement = playerStatement
                 });
             }
+
+            _logger.LogInformation($"Added {playerName}");
         }
 
         return players;
@@ -87,15 +93,20 @@ public class RD2LPlayerDataSource : IPlayerDataSource
 
         foreach (var row in responsePlayers.Where(x => x.Count > 3))
         {
-            var playerId = row[(int)CaptainColumnsSeason31.Dotabuff]?.ToString()
+            var playerId = row[(int)CaptainsColumnsSeason32.Dotabuff]?.ToString()
                 ?.Replace(@"https://www.dotabuff.com/players/", "");
-            var playerName = row[(int)CaptainColumnsSeason31.Name]?.ToString() ??
+            var playerName = row[(int)CaptainsColumnsSeason32.Name]?.ToString() ??
                              PlayerDataSourceConstants.DefaultPlayerName;
+
+            var playerStatement = row[(int)CaptainsColumnsSeason32.Statement]?.ToString() ?? "";
 
             if (long.TryParse(playerId, out var playerIdParsed))
             {
                 players.Add(new PlayerDataSourcePlayer
-                    { Id = playerIdParsed, Name = playerName, IsCaptain = true, CaptainName = playerName });
+                {
+                    Id = playerIdParsed, Name = playerName, IsCaptain = true, CaptainName = playerName,
+                    PlayerStatement = playerStatement
+                });
             }
         }
 

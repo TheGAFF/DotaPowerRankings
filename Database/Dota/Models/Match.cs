@@ -9,6 +9,7 @@ public class Match
         PlayerMatchAbilities = new HashSet<PlayerMatchAbility>();
         PlayerMatchItemUses = new HashSet<PlayerMatchItemUse>();
         PlayerMatches = new HashSet<PlayerMatch>();
+        PlayerMatchKills = new HashSet<PlayerMatchKill>();
     }
 
     public long MatchId { get; set; }
@@ -33,4 +34,5 @@ public class Match
     public virtual ICollection<PlayerMatchAbility> PlayerMatchAbilities { get; set; }
     public virtual ICollection<PlayerMatchItemUse> PlayerMatchItemUses { get; set; }
     public virtual ICollection<PlayerMatch> PlayerMatches { get; set; }
+    public virtual ICollection<PlayerMatchKill> PlayerMatchKills { get; set; }
 }

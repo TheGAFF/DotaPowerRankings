@@ -1,7 +1,7 @@
 ﻿using RD2LPowerRankings.Modules.Dota.Model;
 using RD2LPowerRankings.Services.PlayerDataSource.Models;
 
-namespace RD2LPowerRankings.Modules.Dota;
+namespace RD2LPowerRankings.Services.DotaRanking;
 
 public interface IDotaRankingService
 {

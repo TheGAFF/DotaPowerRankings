@@ -2,8 +2,8 @@ using System.ComponentModel;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using RD2LPowerRankings.Modules.Dota;
 using RD2LPowerRankings.Services.DotaDataSource;
+using RD2LPowerRankings.Services.DotaRanking;
 using RD2LPowerRankings.Services.PlayerDataSource.Models;
 
 namespace RD2LPowerRankings.Controllers;
@@ -36,7 +36,7 @@ public class DotaController : ControllerBase
     /// <returns></returns>
     [HttpGet(Name = "LoadPlayerData")]
     public async Task<bool> LoadPlayerData(
-        [DefaultValue("1NWVvW--B25ioSWj4FKL-z6ssiMqLY3oYXL07s3KGWiU")]
+        [DefaultValue("1RBClnYnKyf5exH3N3Mt7J-R4z0cD4gBT4GnYbPvbLkA")]
         string sheetId)
     {
         _logger.LogInformation($"{nameof(LoadPlayerData)} Started");

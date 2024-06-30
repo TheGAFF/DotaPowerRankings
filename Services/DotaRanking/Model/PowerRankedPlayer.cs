@@ -10,6 +10,7 @@ public class PowerRankedPlayer
 
     [JsonIgnore] public DateTime? CreatedAt { get; set; }
 
+    public string Statement { get; set; }
     public string? DraftName { get; set; }
 
     public string? PersonaName { get; set; }
@@ -161,6 +162,7 @@ public class PowerRankedPlayer
     [JsonIgnore] public decimal AverageBlinkPurchases { get; set; }
 
     [JsonIgnore] public decimal AverageRapierPurchases { get; set; }
+
 
     [JsonIgnore] public decimal AverageGankKills { get; set; }
 

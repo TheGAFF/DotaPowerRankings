@@ -17,7 +17,11 @@ public class DotaDbContext : DbContext
     public virtual DbSet<PlayerMatchAbility> PlayerMatchAbilities { get; set; } = null!;
     public virtual DbSet<PlayerMatchItemUse> PlayerMatchItemUses { get; set; } = null!;
     public virtual DbSet<PlayerWord> PlayerWords { get; set; } = null!;
+
+    public virtual DbSet<PlayerDescription> PlayerDescriptions { get; set; } = null!;
     public virtual DbSet<UnParsedMatch> UnParsedMatches { get; set; } = null!;
+
+    public virtual DbSet<PlayerMatchKill> PlayerMatchKills { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -102,11 +106,37 @@ public class DotaDbContext : DbContext
                 .HasForeignKey(d => d.PlayerId);
         });
 
+        modelBuilder.Entity<PlayerDescription>(entity =>
+        {
+            entity.HasKey(e => new { e.PlayerId, e.SeasonName });
+
+            entity.HasIndex(e => e.PlayerId, "IX_PlayerDescriptions_PlayerId");
+
+            entity.HasIndex(e => e.SeasonName, "IX_PlayerDescriptions_SeasonName");
+
+            entity.HasOne(d => d.Player)
+                .WithMany(p => p.PlayerDescriptions)
+                .HasForeignKey(d => d.PlayerId);
+        });
+
         modelBuilder.Entity<UnParsedMatch>(entity =>
         {
             entity.HasKey(e => e.MatchId);
 
             entity.Property(e => e.MatchId).ValueGeneratedNever();
+        });
+
+        modelBuilder.Entity<PlayerMatchKill>(entity =>
+        {
+            entity.HasKey(e => new { e.PlayerId, e.MatchId, e.Time, e.TargetId });
+
+            entity.HasIndex(e => e.MatchId, "IX_PlayerMatchKills_MatchId");
+
+            entity.HasIndex(e => e.PlayerId, "IX_PlayerMatchKills_PlayerId");
+
+            entity.HasOne(d => d.Match)
+                .WithMany(p => p.PlayerMatchKills)
+                .HasForeignKey(d => d.MatchId);
         });
     }
 }

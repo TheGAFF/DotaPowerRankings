@@ -1,6 +1,6 @@
 ﻿using RD2LPowerRankings.Services.DotaRanking.Enums;
 
-namespace RD2LPowerRankings.Modules.Dota;
+namespace RD2LPowerRankings.Services.DotaRanking;
 
 public class PlayerWordWeights
 {
@@ -11,6 +11,8 @@ public class PlayerWordWeights
         new KeyValuePair<string, DotaEnums.WordToxicity>("idiot", DotaEnums.WordToxicity.Toxic),
         new KeyValuePair<string, DotaEnums.WordToxicity>("report", DotaEnums.WordToxicity.Toxic),
         new KeyValuePair<string, DotaEnums.WordToxicity>("ez", DotaEnums.WordToxicity.NotNiceAtAll),
+        new KeyValuePair<string, DotaEnums.WordToxicity>("jbay", DotaEnums.WordToxicity.SlightlyToxic),
+        new KeyValuePair<string, DotaEnums.WordToxicity>("vvodle", DotaEnums.WordToxicity.VeryWholesome),
         new KeyValuePair<string, DotaEnums.WordToxicity>("retard", DotaEnums.WordToxicity.PoliticallyIncorrect),
         new KeyValuePair<string, DotaEnums.WordToxicity>("garbage", DotaEnums.WordToxicity.Toxic),
         new KeyValuePair<string, DotaEnums.WordToxicity>("clueless", DotaEnums.WordToxicity.Toxic),
@@ -67,6 +69,7 @@ public class PlayerWordWeights
         new KeyValuePair<string, DotaEnums.WordToxicity>("chin", DotaEnums.WordToxicity.Racist),
         new KeyValuePair<string, DotaEnums.WordToxicity>("chong", DotaEnums.WordToxicity.Racist),
         new KeyValuePair<string, DotaEnums.WordToxicity>("jaja", DotaEnums.WordToxicity.Toxic),
+        new KeyValuePair<string, DotaEnums.WordToxicity>("xaxa", DotaEnums.WordToxicity.Toxic),
         new KeyValuePair<string, DotaEnums.WordToxicity>("bean", DotaEnums.WordToxicity.Racist),
         new KeyValuePair<string, DotaEnums.WordToxicity>("spic", DotaEnums.WordToxicity.Racist),
         new KeyValuePair<string, DotaEnums.WordToxicity>("nigg", DotaEnums.WordToxicity.Racist),
@@ -88,12 +91,19 @@ public class PlayerWordWeights
         new KeyValuePair<string, DotaEnums.WordToxicity>("zero", DotaEnums.WordToxicity.SlightlyToxic),
         new KeyValuePair<string, DotaEnums.WordToxicity>("these", DotaEnums.WordToxicity.SlightlyToxic),
         new KeyValuePair<string, DotaEnums.WordToxicity>("expect", DotaEnums.WordToxicity.SlightlyToxic),
-        new KeyValuePair<string, DotaEnums.WordToxicity>("jbay", DotaEnums.WordToxicity.SlightlyToxic),
-        new KeyValuePair<string, DotaEnums.WordToxicity>("vvodle", DotaEnums.WordToxicity.VeryWholesome),
         new KeyValuePair<string, DotaEnums.WordToxicity>("disrespect", DotaEnums.WordToxicity.NotNiceAtAll),
         new KeyValuePair<string, DotaEnums.WordToxicity>("think", DotaEnums.WordToxicity.NotNiceAtAll),
         new KeyValuePair<string, DotaEnums.WordToxicity>("typical", DotaEnums.WordToxicity.NotNiceAtAll),
         new KeyValuePair<string, DotaEnums.WordToxicity>("donkey", DotaEnums.WordToxicity.NotNice),
-        new KeyValuePair<string, DotaEnums.WordToxicity>("imagine", DotaEnums.WordToxicity.NotNice)
+        new KeyValuePair<string, DotaEnums.WordToxicity>("imagine", DotaEnums.WordToxicity.NotNice),
+        new KeyValuePair<string, DotaEnums.WordToxicity>("button", DotaEnums.WordToxicity.NotNice),
+        new KeyValuePair<string, DotaEnums.WordToxicity>("fountain", DotaEnums.WordToxicity.NotNice),
+        new KeyValuePair<string, DotaEnums.WordToxicity>("prio", DotaEnums.WordToxicity.NotNice),
+        new KeyValuePair<string, DotaEnums.WordToxicity>("throne", DotaEnums.WordToxicity.NotNice),
+        new KeyValuePair<string, DotaEnums.WordToxicity>("school", DotaEnums.WordToxicity.Toxic),
+        new KeyValuePair<string, DotaEnums.WordToxicity>("inbred", DotaEnums.WordToxicity.Toxic),
+        new KeyValuePair<string, DotaEnums.WordToxicity>("guarantee", DotaEnums.WordToxicity.NotNice),
+        new KeyValuePair<string, DotaEnums.WordToxicity>("matchmaking", DotaEnums.WordToxicity.NotNice),
+        new KeyValuePair<string, DotaEnums.WordToxicity>("bullshit", DotaEnums.WordToxicity.NotNice)
     };
 }

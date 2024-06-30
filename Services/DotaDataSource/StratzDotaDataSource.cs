@@ -370,7 +370,7 @@ public class StratzDotaDataSource : IDotaDataSource
                 var invisibleKillCount = 0;
                 var tpRecentlyKillCount = 0;
                 var gankKillCount = 0;
-                var killEvents = new List<PlayerMatchKill>();
+
                 foreach (var action in player["stats"]["killEvents"])
                 {
                     smokeKillCount += action["isSmoke"]?.Value<bool?>() ?? false ? 1 : 0;
@@ -384,10 +384,6 @@ public class StratzDotaDataSource : IDotaDataSource
                         firstBloodTime = action["time"]?.Value<int?>() ?? 0;
                         firstBloodPlayerId = playerMatch.PlayerId;
                     }
-
-                    var playerKill = new PlayerMatchKill();
-                    playerKill.PlayerId = playerMatch.PlayerId;
-                    playerKill.PlayerHeroId = playerMatch.HeroId;
                 }
 
                 playerMatch.SmokeKillCount = smokeKillCount;
@@ -439,6 +435,42 @@ public class StratzDotaDataSource : IDotaDataSource
                     .On(x => new { x.PlayerId, x.MatchId, x.ItemId }).RunAsync();
             }
 
+            foreach (JObject player in matchDetails["allPlayers"])
+            {
+                // Ignore anonymous users.
+                if (player["steamAccountId"]?.Value<long?>() == null)
+                {
+                    continue;
+                }
+
+
+                foreach (var action in player["stats"]["killEvents"])
+                {
+                    var playerKill = new PlayerMatchKill();
+
+                    var targetHeroId = action["target"]?.Value<int>() ?? -1;
+
+                    if (targetHeroId < 0)
+                    {
+                        continue;
+                    }
+
+
+                    playerKill.PlayerId = player["steamAccountId"]?.Value<long?>() ?? 0;
+                    playerKill.PlayerHeroId = (DotaEnums.Hero)(player["heroId"]?.Value<int?>() ?? 0);
+                    playerKill.TargetId = _context.PlayerMatches.First(x =>
+                        x.MatchId == match.MatchId && x.HeroId == (DotaEnums.Hero)targetHeroId).PlayerId;
+                    playerKill.TargetHeroId = (DotaEnums.Hero)targetHeroId;
+                    playerKill.Time = action["time"]?.Value<long?>();
+                    playerKill.MatchId = match.MatchId;
+                    playerKill.ItemId = action["byItem"]?.Value<long?>();
+                    playerKill.AbilityId = action["byAbility"]?.Value<long?>();
+
+                    await _context.PlayerMatchKills.Upsert(playerKill)
+                        .On(x => new { x.PlayerId, x.MatchId, x.TargetId, x.Time }).RunAsync();
+                }
+            }
+
             var fbPlayer =
                 await _context.PlayerMatches.FirstOrDefaultAsync(x =>
                     x.PlayerId == firstBloodPlayerId && x.MatchId == match.MatchId);
@@ -476,7 +508,7 @@ public class StratzDotaDataSource : IDotaDataSource
             $"Bearer {_config["Stratz:ApiKey"]}");
         request.AddHeader("Content-Type", "application/json");
         request.AddParameter("application/json",
-            "{\"query\":\"query GetPlayerOverview($steamId: Long!, $matchesMatchesRequest: PlayerMatchesRequestType!, $activityMatchesGroupByRequest: PlayerMatchesGroupByRequestType!) {\\r\\n  player(steamAccountId: $steamId) {\\r\\n    steamAccountId\\r\\n    ...PlayerOverviewMatchesPlayerTypeFragment\\r\\n    ...PlayerOverviewActivityPlayerTypeFragment\\r\\n    __typename\\r\\n  }\\r\\n}\\r\\n\\r\\nfragment PlayerOverviewMatchesPlayerTypeFragment on PlayerType {\\r\\n  steamAccountId\\r\\n  matchesMatches: matches(request: $matchesMatchesRequest) {\\r\\n    ...MatchRowOverview\\r\\n    players(steamAccountId: $steamId) {\\r\\n      ...MatchRowOverviewPlayer\\r\\n      __typename\\r\\n    }\\r\\n    __typename\\r\\n  }\\r\\n  __typename\\r\\n}\\r\\n\\r\\nfragment MatchRowBase on MatchType {\\r\\n  id\\r\\n  lobbyType\\r\\n  gameMode\\r\\n  endDateTime\\r\\n  durationSeconds\\r\\n  averageRank\\r\\n  rank\\r\\n  leagueId\\r\\n  regionId\\r\\n  radiantKills\\r\\n  direKills\\r\\n  allPlayers: players {\\r\\n    matchId\\r\\n    playerSlot\\r\\n    isRadiant\\r\\n    heroId\\r\\n    steamAccountId\\r\\n    isRadiant\\r\\n    kills\\r\\n    deaths\\r\\n    assists\\r\\n    leaverStatus\\r\\n    numLastHits\\r\\n    numDenies\\r\\n    goldPerMinute\\r\\n    experiencePerMinute\\r\\n    level\\r\\n    gold\\r\\n    goldSpent\\r\\n    heroDamage\\r\\n    towerDamage\\r\\n    partyId\\r\\n    isRandom\\r\\n    lane\\r\\n    intentionalFeeding\\r\\n    role\\r\\n    imp\\r\\n    award\\r\\n    item0Id\\r\\n    item1Id\\r\\n    item2Id\\r\\n    item3Id\\r\\n    item4Id\\r\\n    item5Id\\r\\n    backpack0Id\\r\\n    backpack1Id\\r\\n    backpack2Id\\r\\n    heroHealing\\r\\n    lane\\r\\n    isVictory\\r\\n    networth\\r\\n    neutral0Id\\r\\n    dotaPlusHeroXp\\r\\n    invisibleSeconds\\r\\n    streakPrediction\\r\\n    stats {\\r\\n        tripsFountainPerMinute \\r\\n        assistEvents {\\r\\n            time\\r\\n        }\\r\\n        abilityCastReport {\\r\\n            abilityId\\r\\n            count\\r\\n        }\\r\\n        allTalks {\\r\\n            pausedTick\\r\\n        }\\r\\n        deathEvents {\\r\\n            timeDead\\r\\n            isAttemptTpOut\\r\\n            isDieBack\\r\\n            isBurst\\r\\n            byAbility\\r\\n            byItem\\r\\n            goldFed\\r\\n            goldLost\\r\\n        }\\r\\n        runes {\\r\\n            rune\\r\\n        }\\r\\n        actionReport{\\r\\n            pingUsed\\r\\n            scanUsed\\r\\n\\r\\n        }\\r\\n        heroDamageReport {\\r\\n                dealtTotal {\\r\\n                    stunCount\\r\\n                    stunDuration\\r\\n                    slowCount\\r\\n                    slowDuration\\r\\n                }\\r\\n        }\\r\\n        itemUsed {\\r\\n            count\\r\\n            itemId\\r\\n        }\\r\\n        itemPurchases {\\r\\n            itemId\\r\\n            time\\r\\n        }\\r\\n        campStack,\\r\\n        actionsPerMinute,\\r\\n        deniesPerMinute\\r\\n        networthPerMinute\\r\\n        wards {\\r\\n            type\\r\\n        }\\r\\n        courierKills {\\r\\n            time\\r\\n        }\\r\\n        killEvents {\\r\\n            isSmoke\\r\\n            isSolo\\r\\n            isInvisible\\r\\n            assist\\r\\n            isGank\\r\\n            byAbility\\r\\n            byItem\\r\\n            time\\r\\n           isTpRecently\\r\\n        }\\r\\n    }\\r\\n    __typename\\r\\n  }\\r\\n  analysisOutcome\\r\\n  __typename\\r\\n}\\r\\n\\r\\nfragment MatchRowBasePlayer on MatchPlayerType {\\r\\n  steamAccountId\\r\\n  heroId\\r\\n  role\\r\\n  lane\\r\\n  level\\r\\n  isVictory\\r\\n  isRadiant\\r\\n  additionalUnit {\\r\\n      item0Id\\r\\n  }\\r\\n  partyId\\r\\n  __typename\\r\\n}\\r\\n\\r\\nfragment MatchRowOverview on MatchType {\\r\\n  ...MatchRowBase\\r\\n  bottomLaneOutcome\\r\\n  midLaneOutcome\\r\\n  topLaneOutcome\\r\\n  __typename\\r\\n}\\r\\n\\r\\nfragment MatchRowOverviewPlayer on MatchPlayerType {\\r\\n  ...MatchRowBasePlayer\\r\\n  imp\\r\\n  award\\r\\n  kills\\r\\n  deaths\\r\\n  assists\\r\\n  __typename\\r\\n}\\r\\n\\r\\n\\r\\n\\r\\n\\r\\n\\r\\nfragment PlayerOverviewActivityPlayerTypeFragment on PlayerType {\\r\\n  activity {\\r\\n    activity\\r\\n    __typename\\r\\n  }\\r\\n  activityMatchesGroupBy: matchesGroupBy(request: $activityMatchesGroupByRequest) {\\r\\n    __typename\\r\\n  }\\r\\n  __typename\\r\\n}\"," +
+            "{\"query\":\"query GetPlayerOverview($steamId: Long!, $matchesMatchesRequest: PlayerMatchesRequestType!, $activityMatchesGroupByRequest: PlayerMatchesGroupByRequestType!) {\\r\\n  player(steamAccountId: $steamId) {\\r\\n    steamAccountId\\r\\n    ...PlayerOverviewMatchesPlayerTypeFragment\\r\\n    ...PlayerOverviewActivityPlayerTypeFragment\\r\\n    __typename\\r\\n  }\\r\\n}\\r\\n\\r\\nfragment PlayerOverviewMatchesPlayerTypeFragment on PlayerType {\\r\\n  steamAccountId\\r\\n  matchesMatches: matches(request: $matchesMatchesRequest) {\\r\\n    ...MatchRowOverview\\r\\n    players(steamAccountId: $steamId) {\\r\\n      ...MatchRowOverviewPlayer\\r\\n      __typename\\r\\n    }\\r\\n    __typename\\r\\n  }\\r\\n  __typename\\r\\n}\\r\\n\\r\\nfragment MatchRowBase on MatchType {\\r\\n  id\\r\\n  lobbyType\\r\\n  gameMode\\r\\n  endDateTime\\r\\n  durationSeconds\\r\\n  averageRank\\r\\n  rank\\r\\n  leagueId\\r\\n  regionId\\r\\n  radiantKills\\r\\n  direKills\\r\\n  allPlayers: players {\\r\\n    matchId\\r\\n    playerSlot\\r\\n    isRadiant\\r\\n    heroId\\r\\n    steamAccountId\\r\\n    isRadiant\\r\\n    kills\\r\\n    deaths\\r\\n    assists\\r\\n    leaverStatus\\r\\n    numLastHits\\r\\n    numDenies\\r\\n    goldPerMinute\\r\\n    experiencePerMinute\\r\\n    level\\r\\n    gold\\r\\n    goldSpent\\r\\n    heroDamage\\r\\n    towerDamage\\r\\n    partyId\\r\\n    isRandom\\r\\n    lane\\r\\n    intentionalFeeding\\r\\n    role\\r\\n    imp\\r\\n    award\\r\\n    item0Id\\r\\n    item1Id\\r\\n    item2Id\\r\\n    item3Id\\r\\n    item4Id\\r\\n    item5Id\\r\\n    backpack0Id\\r\\n    backpack1Id\\r\\n    backpack2Id\\r\\n    heroHealing\\r\\n    lane\\r\\n    isVictory\\r\\n    networth\\r\\n    neutral0Id\\r\\n    dotaPlusHeroXp\\r\\n    invisibleSeconds\\r\\n    streakPrediction\\r\\n    stats {\\r\\n        tripsFountainPerMinute \\r\\n        assistEvents {\\r\\n            time\\r\\n        }\\r\\n        abilityCastReport {\\r\\n            abilityId\\r\\n            count\\r\\n        }\\r\\n        allTalks {\\r\\n            pausedTick\\r\\n        }\\r\\n        deathEvents {\\r\\n            timeDead\\r\\n            isAttemptTpOut\\r\\n            isDieBack\\r\\n            isBurst\\r\\n            byAbility\\r\\n            byItem\\r\\n            goldFed\\r\\n            goldLost\\r\\n        }\\r\\n        runes {\\r\\n            rune\\r\\n        }\\r\\n        actionReport{\\r\\n            pingUsed\\r\\n            scanUsed\\r\\n\\r\\n        }\\r\\n        heroDamageReport {\\r\\n                dealtTotal {\\r\\n                    stunCount\\r\\n                    stunDuration\\r\\n                    slowCount\\r\\n                    slowDuration\\r\\n                }\\r\\n        }\\r\\n        itemUsed {\\r\\n            count\\r\\n            itemId\\r\\n        }\\r\\n        itemPurchases {\\r\\n            itemId\\r\\n            time\\r\\n        }\\r\\n        campStack,\\r\\n        actionsPerMinute,\\r\\n        deniesPerMinute\\r\\n        networthPerMinute\\r\\n        wards {\\r\\n            type\\r\\n        }\\r\\n        courierKills {\\r\\n            time\\r\\n        }\\r\\n        killEvents {\\r\\n            isSmoke\\r\\n            isSolo\\r\\n            isInvisible\\r\\n            assist\\r\\n            isGank\\r\\n            byAbility\\r\\n            byItem\\r\\n            time\\r\\n           isTpRecently\\r\\n           target\\r\\n        }\\r\\n    }\\r\\n    __typename\\r\\n  }\\r\\n  analysisOutcome\\r\\n  __typename\\r\\n}\\r\\n\\r\\nfragment MatchRowBasePlayer on MatchPlayerType {\\r\\n  steamAccountId\\r\\n  heroId\\r\\n  role\\r\\n  lane\\r\\n  level\\r\\n  isVictory\\r\\n  isRadiant\\r\\n  additionalUnit {\\r\\n      item0Id\\r\\n  }\\r\\n  partyId\\r\\n  __typename\\r\\n}\\r\\n\\r\\nfragment MatchRowOverview on MatchType {\\r\\n  ...MatchRowBase\\r\\n  bottomLaneOutcome\\r\\n  midLaneOutcome\\r\\n  topLaneOutcome\\r\\n  __typename\\r\\n}\\r\\n\\r\\nfragment MatchRowOverviewPlayer on MatchPlayerType {\\r\\n  ...MatchRowBasePlayer\\r\\n  imp\\r\\n  award\\r\\n  kills\\r\\n  deaths\\r\\n  assists\\r\\n  __typename\\r\\n}\\r\\n\\r\\n\\r\\n\\r\\n\\r\\n\\r\\nfragment PlayerOverviewActivityPlayerTypeFragment on PlayerType {\\r\\n  activity {\\r\\n    activity\\r\\n    __typename\\r\\n  }\\r\\n  activityMatchesGroupBy: matchesGroupBy(request: $activityMatchesGroupByRequest) {\\r\\n    __typename\\r\\n  }\\r\\n  __typename\\r\\n}\"," +
             "\"variables\":{\"matchMetersMatchesGroupByRequest\":{\"take\":0,\"groupBy\":\"IS_VICTORY\",\"playerList\":\"SINGLE\"},\"matchMetersSkipMatchesGroupBy\":true,\"steamId\":" +
             playerId + "," +
             "\"matchesMatchesRequest\":{ \"isParsed\":true, \"take\":" + take + ",\"skip\":" + skip +

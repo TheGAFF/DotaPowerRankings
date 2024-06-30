@@ -46,15 +46,17 @@ public class DotaRankingService : IDotaRankingService
         {
             var powerRankedDivision = new PowerRankedDivision { Name = division.Name };
 
-            var playerIds = _playerDataSource.GetPlayers(division.SheetId).Select(x => x.Id).ToArray();
+            var players = _playerDataSource.GetPlayers(division.SheetId).ToArray();
 
-            powerRankedDivision.Players = GeneratePlayersStats(playerIds, powerRankedLeague, powerRankedDivision);
+            powerRankedDivision.Players = GeneratePlayersStats(players.ToList(), powerRankedLeague,
+                powerRankedDivision);
 
             powerRankedDivision.Players = _dotaAwardsService.GiveDivisionPlayerAwards(powerRankedDivision.Players);
 
             powerRankedDivision.Players = RankPlayers(powerRankedDivision.Players, powerRankedDivision);
 
-            powerRankedDivision.Players = await _openAiService.GeneratePlayerReviews(powerRankedDivision.Players);
+            powerRankedDivision.Players = await _openAiService.GeneratePlayerReviews(powerRankedDivision.Players,
+                $"{division.Name}-{league.Name}-{league.FileName}");
 
             powerRankedLeague.Divisions.Add(powerRankedDivision);
         }
@@ -74,7 +76,7 @@ public class DotaRankingService : IDotaRankingService
 
             division.Teams = _playerDataSource.GetTeams(division.SheetId);
 
-            var players = GeneratePlayersStats(division.Teams.SelectMany(x => x.Players).Select(x => x.Id).ToArray(),
+            var players = GeneratePlayersStats(division.Teams.SelectMany(x => x.Players).ToList(),
                 powerRankedLeague, powerRankedDivision);
 
             foreach (var team in division.Teams)
@@ -110,7 +112,8 @@ public class DotaRankingService : IDotaRankingService
         {
             foreach (var team in division.Teams)
             {
-                team.Players = await _openAiService.GeneratePlayerReviews(team.Players);
+                team.Players = await _openAiService.GeneratePlayerReviews(team.Players,
+                    $"{division.Name}-{league.Name}-{league.FileName}");
             }
 
             division.Teams =
@@ -122,10 +125,13 @@ public class DotaRankingService : IDotaRankingService
         return powerRankedLeague;
     }
 
-    private List<PowerRankedPlayer> GeneratePlayersStats(long[] playerIds, PowerRankedLeague league,
+    private List<PowerRankedPlayer> GeneratePlayersStats(List<PlayerDataSourcePlayer> sheetPlayers,
+        PowerRankedLeague league,
         PowerRankedDivision division)
     {
         var powerRankedPlayers = new ConcurrentQueue<PowerRankedPlayer>();
+
+        var playerIds = sheetPlayers.Select(x => x.Id).ToArray();
 
         var cutOffDate = DateTimeOffset.UtcNow.Subtract(TimeSpan.FromDays(DotaDataConstants.CutOffDateDays))
             .ToUnixTimeSeconds();
@@ -143,6 +149,9 @@ public class DotaRankingService : IDotaRankingService
             .Where(x => playerIds.Any(y => y == x.PlayerId)).ToList();
         var playerAbilities = _context.PlayerMatchAbilities.AsNoTracking()
             .Where(x => playerIds.Any(y => y == x.PlayerId)).ToList();
+        var playerKills = _context.PlayerMatchKills.AsNoTracking().Where(x => playerIds.Any(y => y == x.PlayerId))
+            .ToList();
+
         Parallel.ForEach(playerIds, new ParallelOptions { MaxDegreeOfParallelism = 4 },
             playerId =>
             {
@@ -155,10 +164,12 @@ public class DotaRankingService : IDotaRankingService
                 powerRankedPlayers.Enqueue(
                     GeneratePowerRankedPlayer(
                         player,
+                        sheetPlayers.First(x => x.Id == playerId),
                         playerMatches.Where(x => x.PlayerId == playerId).ToList(),
                         playerWords.Where(x => x.PlayerId == playerId).ToList(),
                         playerItemUses.Where(x => x.PlayerId == playerId).ToList(),
                         playerAbilities.Where(x => x.PlayerId == playerId).ToList(),
+                        playerKills.Where(x => x.PlayerId == playerId).ToList(),
                         league,
                         division
                     ));
@@ -167,11 +178,12 @@ public class DotaRankingService : IDotaRankingService
         return powerRankedPlayers.ToList();
     }
 
-    private PowerRankedPlayer GeneratePowerRankedPlayer(Player player,
+    private PowerRankedPlayer GeneratePowerRankedPlayer(Player player, PlayerDataSourcePlayer sheetPlayer,
         List<PlayerMatch> playerMatches,
         List<PlayerWord> playerWords,
         List<PlayerMatchItemUse> playerItemUses,
         List<PlayerMatchAbility> playerMatchAbilities,
+        List<PlayerMatchKill> playerMatchKills,
         PowerRankedLeague league,
         PowerRankedDivision division)
     {
@@ -181,11 +193,15 @@ public class DotaRankingService : IDotaRankingService
                 playerItemUses.Where(x => x.MatchId == playerMatch.MatchId).ToList();
             playerMatch.Match.PlayerMatchAbilities =
                 playerMatchAbilities.Where(x => x.MatchId == playerMatch.MatchId).ToList();
+
+            playerMatch.Match.PlayerMatchKills = playerMatchKills.Where(x => x.MatchId == playerMatch.MatchId).ToList();
         }
 
 
         var powerRankedPlayer = _mapper.Map<PowerRankedPlayer>(player);
         powerRankedPlayer.DivisionName = division.Name;
+        powerRankedPlayer.Statement = sheetPlayer.PlayerStatement;
+        powerRankedPlayer.Cost = sheetPlayer.Cost;
 
         if (playerMatches.Count == 0)
         {
@@ -227,8 +243,8 @@ public class DotaRankingService : IDotaRankingService
             .Sum(x => x.Pings) / playerMatches.Count;
 
         powerRankedPlayer.AverageExcessPingAbandons =
-            (decimal)playerMatches.Where(x => x.Pings > DotaRankingConstants.ExcessivePingThreshold && x.LeaverStatus ==
-                    "ABANDONED")
+            (decimal)playerMatches.Where(x => x is
+                    { Pings: > DotaRankingConstants.ExcessivePingThreshold, LeaverStatus: "ABANDONED" })
                 .Sum(x => x.Pings) / playerMatches.Count;
 
         powerRankedPlayer.AverageTeamFightParticipation = playerMatches.Average(x => x.TeamfightParticipation);
@@ -240,18 +256,18 @@ public class DotaRankingService : IDotaRankingService
             (decimal)playerMatches.Where(x => x.LaneEfficiencyPct > 40).Average(x => x.LaneEfficiencyPct) / 4000M;
 
         powerRankedPlayer.AverageLaneEfficiencyMid =
-            (decimal)playerMatches.Where(x => x.LaneRole == DotaEnums.TeamRole.Midlane && x.Lane == DotaEnums.Lane.Mid)
+            (decimal)playerMatches.Where(x => x is { LaneRole: DotaEnums.TeamRole.Midlane, Lane: DotaEnums.Lane.Mid })
                 .DefaultIfEmpty()
                 .Average(x => x?.LaneEfficiencyPct ?? 0) / 4000M;
 
         powerRankedPlayer.AverageLaneEfficiencyOff =
-            (decimal)playerMatches.Where(x => x.LaneRole == DotaEnums.TeamRole.Offlane && x.Lane == DotaEnums.Lane.Off)
+            (decimal)playerMatches.Where(x => x is { LaneRole: DotaEnums.TeamRole.Offlane, Lane: DotaEnums.Lane.Off })
                 .DefaultIfEmpty()
                 .Average(x => x?.LaneEfficiencyPct ?? 0) / 4000M;
 
         powerRankedPlayer.AverageLaneEfficiencySafe =
             (decimal)playerMatches
-                .Where(x => x.LaneRole == DotaEnums.TeamRole.Safelane && x.Lane == DotaEnums.Lane.Safe)
+                .Where(x => x is { LaneRole: DotaEnums.TeamRole.Safelane, Lane: DotaEnums.Lane.Safe })
                 .DefaultIfEmpty()
                 .Average(x => x?.LaneEfficiencyPct ?? 0) / 4000M;
 
@@ -289,15 +305,15 @@ public class DotaRankingService : IDotaRankingService
             playerMatches.Count * 1M;
 
         powerRankedPlayer.AverageBestPos1 =
-            playerMatches.Count(x => x.Award == "TOP_CORE" && x.LaneRole == DotaEnums.TeamRole.Safelane) * 1M /
+            playerMatches.Count(x => x is { Award: "TOP_CORE", LaneRole: DotaEnums.TeamRole.Safelane }) * 1M /
             playerMatches.Count * 1M;
 
         powerRankedPlayer.AverageBestPos2 =
-            playerMatches.Count(x => x.Award == "TOP_CORE" && x.LaneRole == DotaEnums.TeamRole.Midlane) * 1M /
+            playerMatches.Count(x => x is { Award: "TOP_CORE", LaneRole: DotaEnums.TeamRole.Midlane }) * 1M /
             playerMatches.Count * 1M;
 
         powerRankedPlayer.AverageBestPos3 =
-            playerMatches.Count(x => x.Award == "TOP_CORE" && x.LaneRole == DotaEnums.TeamRole.Offlane) * 1M /
+            playerMatches.Count(x => x is { Award: "TOP_CORE", LaneRole: DotaEnums.TeamRole.Offlane }) * 1M /
             playerMatches.Count * 1M;
 
         powerRankedPlayer.AverageBestSupport =
@@ -306,11 +322,11 @@ public class DotaRankingService : IDotaRankingService
             playerMatches.Count * 1M;
 
         powerRankedPlayer.AverageBestPos4 =
-            playerMatches.Count(x => x.Award == "TOP_SUPPORT" && x.LaneRole == DotaEnums.TeamRole.SoftSupport) * 1M /
+            playerMatches.Count(x => x is { Award: "TOP_SUPPORT", LaneRole: DotaEnums.TeamRole.SoftSupport }) * 1M /
             playerMatches.Count * 1M;
 
         powerRankedPlayer.AverageBestPos5 =
-            playerMatches.Count(x => x.Award == "TOP_SUPPORT" && x.LaneRole == DotaEnums.TeamRole.HardSupport) * 1M /
+            playerMatches.Count(x => x is { Award: "TOP_SUPPORT", LaneRole: DotaEnums.TeamRole.HardSupport }) * 1M /
             playerMatches.Count * 1M;
 
 
@@ -347,18 +363,18 @@ public class DotaRankingService : IDotaRankingService
                 heroMatches.Count() * 1M;
             hero.SafelanePercent =
                 (decimal)heroMatches.Count(x =>
-                    x.Lane == DotaEnums.Lane.Safe && x.LaneRole == DotaEnums.TeamRole.Safelane) /
+                    x is { Lane: DotaEnums.Lane.Safe, LaneRole: DotaEnums.TeamRole.Safelane }) /
                 heroMatches.Count() * 1M;
             hero.JunglePercent =
                 (decimal)heroMatches.Count(x => x.Lane == DotaEnums.Lane.Jungle) /
                 heroMatches.Count() * 1M;
             hero.OfflanePercent =
                 (decimal)heroMatches.Count(x =>
-                    x.Lane == DotaEnums.Lane.Off && x.LaneRole == DotaEnums.TeamRole.Offlane) /
+                    x is { Lane: DotaEnums.Lane.Off, LaneRole: DotaEnums.TeamRole.Offlane }) /
                 heroMatches.Count() * 1M;
 
             hero.SoftSupportPercent = (decimal)heroMatches.Count(x =>
-                    x.LaneRole == DotaEnums.TeamRole.SoftSupport && x.Lane == DotaEnums.Lane.Off) /
+                    x is { LaneRole: DotaEnums.TeamRole.SoftSupport, Lane: DotaEnums.Lane.Off }) /
                 heroMatches.Count() * 1M;
 
             hero.HardSupportPercent =
@@ -380,19 +396,19 @@ public class DotaRankingService : IDotaRankingService
             }
 
             hero.SoloNormalMatchMakingPercent =
-                (decimal)heroMatches.Count(x => x.LobbyType == DotaEnums.LobbyType.Normal && x.PartyId == null) /
+                (decimal)heroMatches.Count(x => x is { LobbyType: DotaEnums.LobbyType.Normal, PartyId: null }) /
                 heroMatches.Count() * 1M;
 
             hero.SoloRankedMatchMakingPercent =
-                (decimal)heroMatches.Count(x => x.LobbyType == DotaEnums.LobbyType.Ranked && x.PartyId == null) /
+                (decimal)heroMatches.Count(x => x is { LobbyType: DotaEnums.LobbyType.Ranked, PartyId: null }) /
                 heroMatches.Count() * 1M;
 
             hero.PartyNormalMatchMakingPercent =
-                (decimal)heroMatches.Count(x => x.LobbyType == DotaEnums.LobbyType.Normal && x.PartyId != null) /
+                (decimal)heroMatches.Count(x => x is { LobbyType: DotaEnums.LobbyType.Normal, PartyId: not null }) /
                 heroMatches.Count() * 1M;
 
             hero.PartyRankedMatchMakingPercent =
-                (decimal)heroMatches.Count(x => x.LobbyType == DotaEnums.LobbyType.Ranked && x.PartyId != null) /
+                (decimal)heroMatches.Count(x => x is { LobbyType: DotaEnums.LobbyType.Ranked, PartyId: not null }) /
                 heroMatches.Count() * 1M;
 
             hero.BattleCupMatchMakingPercent =
@@ -424,10 +440,10 @@ public class DotaRankingService : IDotaRankingService
             return hero;
         }
 
-        var normalizedWinrate = hero.WinRate / DotaRankingConstants.MaxWinrate;
+        var normalizedWinRate = hero.WinRate / DotaRankingConstants.MaxWinRate;
 
         var normalizedGamesPlayed =
-            Math.Log10(hero.MatchesPlayed + 1) / Math.Log10(DotaRankingConstants.MaxGamesPlayed + 1);
+            Convert.ToDecimal(Math.Log10(hero.MatchesPlayed + 1) / Math.Log10(DotaRankingConstants.MaxGamesPlayed + 1));
 
         var normalizedBadge = (hero.SkillAverageBadge - DotaRankingConstants.MinBadge) * 1M /
             (DotaRankingConstants.MaxBadge - DotaRankingConstants.MinBadge) * 1M;
@@ -441,9 +457,9 @@ public class DotaRankingService : IDotaRankingService
         var normalizedImpact = (hero.Impact - DotaRankingConstants.MinImpact) /
                                (DotaRankingConstants.MaxImpact - DotaRankingConstants.MinImpact);
 
-        var winRateScore = normalizedWinrate * DotaRankingConstants.WeightWinrate;
+        var winRateScore = normalizedWinRate * DotaRankingConstants.WeightWinRate;
         var badgesScore = normalizedBadge * DotaRankingConstants.WeightBadge;
-        var gamesPlayedScore = Convert.ToDecimal(normalizedGamesPlayed) * DotaRankingConstants.WeightGamesPlayed;
+        var gamesPlayedScore = normalizedGamesPlayed * DotaRankingConstants.WeightGamesPlayed;
         var impactScore = normalizedImpact * DotaRankingConstants.WeightImpact;
         var leaderboardScore = normalizedLeaderboard * DotaRankingConstants.WeightLeaderboard;
 

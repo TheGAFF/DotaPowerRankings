@@ -21,6 +21,41 @@ public enum PlayerColumns
     Statement = 16
 }
 
+public enum PlayerColumnsSeason32
+{
+    PickedBy = 0,
+    Name = 1,
+    DraftMMR = 2,
+    SiteValue = 3,
+    Rank = 4,
+    Value = 5,
+    Dotabuff = 6,
+    Pos1 = 7,
+    Pos2 = 8,
+    Pos3 = 9,
+    Pos4 = 10,
+    Pos5 = 11,
+    Drafter = 12,
+    TeamOrganizer = 13,
+    Statement = 14
+}
+
+public enum CaptainsColumnsSeason32
+{
+    Name = 0,
+    Badge = 1,
+    DraftMMR = 2,
+    Rank = 3,
+    OldMedal = 4,
+    OldRank = 5,
+    Value = 6,
+    OldMMR = 7,
+    MMRScreenshot = 8,
+    Statement = 9,
+    Dotabuff = 12,
+    OpenDota = 13
+}
+
 public enum PlayerColumnsSeason31
 {
     EstimatedValue = 0,

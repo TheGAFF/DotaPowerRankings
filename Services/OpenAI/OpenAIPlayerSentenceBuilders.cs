@@ -8,14 +8,16 @@ public class OpenAIPlayerSentenceBuilders
     public static List<string> ReviewPrefixWords = new()
     {
         "very funny", "snarky", "serious", "very sarcastic", "brutally honest", "hilarious", "suspenseful",
-        "emotionally charged", "stand-up comedy styled",
+        "emotionally charged", "stand-up comedy styled", "jersey accent styled",
         "silly", "Donald Trump styled", "King James Bible styled", "pirate speak styled",
-        "snobby aristocratic styled", "surfer-dude styled", "redneck styled", "cowboy western styled",
+        "pretentious aristocratic styled", "surfer-dude styled", "redneck styled", "cowboy western styled",
         "valley girl styled", "gangster styled", "loyal butler styled", "funny poetic", "fuckboi styled",
         "sarcastic poetic", "cruel poetic", "social media influencer styled", "australian accent styled",
         "game show host styled", "fairy tale narrator styled", "victorian styled", "Dr. Seuss styled",
-        "funny rap", "funny song", "vulgar song", "vulgar rap", "based", "very based", "hash tag filled", "joke filled",
-        "potty humor filled", "zoomer-word filled", "boomer humor filled"
+        "vulgar song that rhymes", "based",
+        "very based", "with tons of hashtags",
+        "joke filled",
+        "potty humor filled", "zoomer-word filled"
     };
 
     public static List<string> RankWords = new()

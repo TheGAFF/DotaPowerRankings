@@ -1,5 +1,5 @@
-﻿using RD2LPowerRankings.Modules.Dota;
-using RD2LPowerRankings.Modules.Dota.Model;
+﻿using RD2LPowerRankings.Modules.Dota.Model;
+using RD2LPowerRankings.Services.DotaRanking;
 using RD2LPowerRankings.Services.DotaRanking.Enums;
 
 namespace RD2LPowerRankings.Services.DotaAwards;
